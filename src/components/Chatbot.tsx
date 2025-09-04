@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FloatingBottomNav } from './FloatingBottomNav';
+import FloatingBottomNav from './FloatingBottomNav';
 
 interface Message {
   id: string;
@@ -299,7 +299,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ onBack }) => {
       {/* Enhanced Floating Bottom Navigation */}
       <FloatingBottomNav
         activeTab="search"
-        onTabChange={(tabId) => {
+        onTabChange={(tabId: string) => {
           if (tabId === 'home') {
             onBack();
           }

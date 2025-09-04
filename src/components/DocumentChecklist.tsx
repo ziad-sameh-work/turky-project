@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FloatingBottomNav } from './FloatingBottomNav';
+import FloatingBottomNav from './FloatingBottomNav';
 
 interface Document {
   id: string;
@@ -497,7 +497,7 @@ For questions, contact the university admissions office.
       {/* Enhanced Floating Bottom Navigation */}
       <FloatingBottomNav
         activeTab="search"
-        onTabChange={(tabId) => {
+        onTabChange={(tabId: string) => {
           if (tabId === 'home') {
             onBack();
           }

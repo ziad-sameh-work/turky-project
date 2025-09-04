@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FloatingBottomNav } from './FloatingBottomNav';
+import FloatingBottomNav from './FloatingBottomNav';
 
 interface Task {
   id: string;
@@ -370,7 +370,7 @@ const StudyPlanner: React.FC<StudyPlannerProps> = ({ onBack }) => {
 
       <FloatingBottomNav
         activeTab="search"
-        onTabChange={(tabId) => {
+        onTabChange={(tabId: string) => {
           if (tabId === 'home') {
             onBack();
           }

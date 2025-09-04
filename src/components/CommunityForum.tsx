@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FloatingBottomNav } from './FloatingBottomNav';
+import FloatingBottomNav from './FloatingBottomNav';
 
 interface ForumPost {
   id: string;
@@ -513,7 +513,7 @@ const CommunityForum: React.FC<CommunityForumProps> = ({ onBack }) => {
       {/* Enhanced Floating Bottom Navigation */}
       <FloatingBottomNav
         activeTab="search"
-        onTabChange={(tabId) => {
+        onTabChange={(tabId: string) => {
           if (tabId === 'home') {
             onBack();
           }

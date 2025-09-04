@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FloatingBottomNav } from './FloatingBottomNav';
+import FloatingBottomNav from './FloatingBottomNav';
 
 interface Dorm {
   id: string;
@@ -489,7 +489,7 @@ const HousingGuide: React.FC<HousingGuideProps> = ({ onBack }) => {
       {/* Enhanced Floating Bottom Navigation */}
       <FloatingBottomNav
         activeTab="search"
-        onTabChange={(tabId) => {
+        onTabChange={(tabId: string) => {
           if (tabId === 'home') {
             onBack();
           }

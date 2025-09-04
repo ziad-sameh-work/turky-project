@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { explorationNavItems } from '@/data/mockData';
-import { FloatingBottomNav } from './FloatingBottomNav';
+import FloatingBottomNav from './FloatingBottomNav';
 import Chatbot from './Chatbot';
 import CommunityForum from './CommunityForum';
 import HousingGuide from './HousingGuide';
@@ -327,7 +327,7 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
       {/* Enhanced Floating Bottom Navigation */}
       <FloatingBottomNav
         activeTab="search"
-        onTabChange={(tabId) => {
+        onTabChange={(tabId: string) => {
           if (tabId === 'home') {
             onBack();
           }
