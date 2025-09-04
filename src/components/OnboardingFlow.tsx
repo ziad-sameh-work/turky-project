@@ -10,6 +10,7 @@ import LanguageSelection from './LanguageSelection';
 import SignupLogin from './SignupLogin';
 import StudentDashboard from './StudentDashboard';
 import ExplorationDashboard from './ExplorationDashboard';
+import TouristOnboardingFlow from './TouristOnboardingFlow';
 import { mockUserProfile, mockBadges } from '@/data/mockData';
 
 type OnboardingStep = 
@@ -20,7 +21,8 @@ type OnboardingStep =
   | 'language' 
   | 'signup' 
   | 'dashboard'
-  | 'exploration';
+  | 'exploration'
+  | 'tourist';
 
 const OnboardingFlow: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('welcome');
@@ -33,8 +35,14 @@ const OnboardingFlow: React.FC = () => {
   };
 
   const handleUserTypeSelect = (userType: string) => {
-    setUserProfile(prev => ({ ...prev, userType: userType as any }));
-    setCurrentStep('quiz');
+    setUserProfile(prev => ({ ...prev, userType: userType as 'student' | 'tourist' | 'resident' }));
+    
+    // Route to tourist flow if tourist is selected
+    if (userType === 'tourist') {
+      setCurrentStep('tourist');
+    } else {
+      setCurrentStep('quiz');
+    }
   };
 
   const handleQuizComplete = (answers: Record<string, string[]>) => {
@@ -180,6 +188,10 @@ const OnboardingFlow: React.FC = () => {
             userProfile={userProfile} 
             onBack={() => setCurrentStep('dashboard')}
           />
+        )}
+        
+        {currentStep === 'tourist' && (
+          <TouristOnboardingFlow key="tourist" />
         )}
       </AnimatePresence>
       
