@@ -3,7 +3,12 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { explorationNavItems } from '@/data/mockData';
-import FloatingBottomNav from './FloatingBottomNav';
+import { FloatingBottomNav } from './FloatingBottomNav';
+import Chatbot from './Chatbot';
+import CommunityForum from './CommunityForum';
+import HousingGuide from './HousingGuide';
+import DocumentChecklist from './DocumentChecklist';
+import StudyPlanner from './StudyPlanner';
 import UniversityRankings from './UniversityRankings';
 import ScholarshipListings from './ScholarshipListings';
 import CostCalculator from './CostCalculator';
@@ -19,6 +24,11 @@ type ExplorationView = 'dashboard' | 'universities' | 'scholarships' | 'costs' |
 
 const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile, onBack }) => {
   const [currentView, setCurrentView] = useState<ExplorationView>('dashboard');
+  const [showChatbot, setShowChatbot] = useState(false);
+  const [showCommunity, setShowCommunity] = useState(false);
+  const [showHousing, setShowHousing] = useState(false);
+  const [showDocuments, setShowDocuments] = useState(false);
+  const [showPlanner, setShowPlanner] = useState(false);
   const [selectedUniversityId, setSelectedUniversityId] = useState<string>('');
 
   const handleUniversitySelect = (universityId: string) => {
@@ -239,29 +249,77 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
           </div>
         </motion.div>
 
-        {/* Quick Actions */}
+        {/* Phase 3 Interactive Features */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.3 }}
-          className="grid grid-cols-2 gap-4"
+          transition={{ delay: 1.4 }}
+          className="mb-8"
+        >
+          <h2 className="text-white font-bold text-lg mb-4">🚀 Interactive Tools</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowChatbot(true)}
+              className="p-4 bg-gradient-to-r from-blue-500/20 to-blue-700/20 border border-blue-500/30 rounded-2xl text-center"
+            >
+              <div className="text-blue-400 text-3xl mb-2">🤖</div>
+              <div className="text-blue-300 font-semibold text-sm">AI Assistant</div>
+              <div className="text-gray-400 text-xs mt-1">Ask about universities</div>
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowCommunity(true)}
+              className="p-4 bg-gradient-to-r from-green-500/20 to-green-700/20 border border-green-500/30 rounded-2xl text-center"
+            >
+              <div className="text-green-400 text-3xl mb-2">👥</div>
+              <div className="text-green-300 font-semibold text-sm">Community</div>
+              <div className="text-gray-400 text-xs mt-1">Connect with students</div>
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowHousing(true)}
+              className="p-4 bg-gradient-to-r from-orange-500/20 to-orange-700/20 border border-orange-500/30 rounded-2xl text-center"
+            >
+              <div className="text-orange-400 text-3xl mb-2">🏠</div>
+              <div className="text-orange-300 font-semibold text-sm">Housing Guide</div>
+              <div className="text-gray-400 text-xs mt-1">Find dorms & apartments</div>
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowDocuments(true)}
+              className="p-4 bg-gradient-to-r from-indigo-500/20 to-indigo-700/20 border border-indigo-500/30 rounded-2xl text-center"
+            >
+              <div className="text-indigo-400 text-3xl mb-2">📋</div>
+              <div className="text-indigo-300 font-semibold text-sm">Documents</div>
+              <div className="text-gray-400 text-xs mt-1">Application checklist</div>
+            </motion.button>
+          </div>
+        </motion.div>
+
+        {/* Study Planner */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.6 }}
+          className="mb-8"
         >
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="p-4 bg-gradient-to-r from-green-500/20 to-green-700/20 border border-green-500/30 rounded-2xl text-center"
+            onClick={() => setShowPlanner(true)}
+            className="w-full p-6 bg-gradient-to-r from-teal-500/20 to-teal-700/20 border border-teal-500/30 rounded-2xl text-center"
           >
-            <div className="text-green-400 text-3xl mb-2">📊</div>
-            <div className="text-green-300 font-semibold text-sm">Compare Universities</div>
-          </motion.button>
-          
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="p-4 bg-gradient-to-r from-purple-500/20 to-purple-700/20 border border-purple-500/30 rounded-2xl text-center"
-          >
-            <div className="text-purple-400 text-3xl mb-2">🎯</div>
-            <div className="text-purple-300 font-semibold text-sm">Match Finder</div>
+            <div className="text-teal-400 text-4xl mb-3">📅</div>
+            <div className="text-teal-300 font-bold text-lg mb-2">Study Planner</div>
+            <div className="text-gray-400 text-sm">Create timeline for your application journey</div>
           </motion.button>
         </motion.div>
       </div>
@@ -279,6 +337,27 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
       />
     </div>
   );
+
+  // Render Phase 3 components
+  if (showChatbot) {
+    return <Chatbot onBack={() => setShowChatbot(false)} />;
+  }
+  
+  if (showCommunity) {
+    return <CommunityForum onBack={() => setShowCommunity(false)} />;
+  }
+  
+  if (showHousing) {
+    return <HousingGuide onBack={() => setShowHousing(false)} />;
+  }
+  
+  if (showDocuments) {
+    return <DocumentChecklist onBack={() => setShowDocuments(false)} />;
+  }
+  
+  if (showPlanner) {
+    return <StudyPlanner onBack={() => setShowPlanner(false)} />;
+  }
 
   return (
     <AnimatePresence mode="wait">
