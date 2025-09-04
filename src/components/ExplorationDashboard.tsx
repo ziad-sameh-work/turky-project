@@ -14,6 +14,10 @@ import ScholarshipListings from './ScholarshipListings';
 import CostCalculator from './CostCalculator';
 import AdmissionGuide from './AdmissionGuide';
 import VirtualCampusTour from './VirtualCampusTour';
+import NotificationCenter from './NotificationCenter';
+import PremiumSubscription from './PremiumSubscription';
+import StudyDiary from './StudyDiary';
+import AchievementDashboard from './AchievementDashboard';
 
 interface ExplorationDashboardProps {
   userProfile: any;
@@ -29,6 +33,10 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
   const [showHousing, setShowHousing] = useState(false);
   const [showDocuments, setShowDocuments] = useState(false);
   const [showPlanner, setShowPlanner] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showPremium, setShowPremium] = useState(false);
+  const [showDiary, setShowDiary] = useState(false);
+  const [showAchievements, setShowAchievements] = useState(false);
   const [selectedUniversityId, setSelectedUniversityId] = useState<string>('');
 
   const handleUniversitySelect = (universityId: string) => {
@@ -322,6 +330,61 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
             <div className="text-gray-400 text-sm">Create timeline for your application journey</div>
           </motion.button>
         </motion.div>
+
+        {/* Phase 4 Retention Features */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.8 }}
+          className="mb-8"
+        >
+          <h2 className="text-white font-bold text-lg mb-4">🎯 Stay Engaged</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowNotifications(true)}
+              className="p-4 bg-gradient-to-r from-red-500/20 to-red-700/20 border border-red-500/30 rounded-2xl text-center"
+            >
+              <div className="text-red-400 text-3xl mb-2">🔔</div>
+              <div className="text-red-300 font-semibold text-sm">Notifications</div>
+              <div className="text-gray-400 text-xs mt-1">Stay updated</div>
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowDiary(true)}
+              className="p-4 bg-gradient-to-r from-pink-500/20 to-pink-700/20 border border-pink-500/30 rounded-2xl text-center"
+            >
+              <div className="text-pink-400 text-3xl mb-2">📖</div>
+              <div className="text-pink-300 font-semibold text-sm">Study Diary</div>
+              <div className="text-gray-400 text-xs mt-1">Document journey</div>
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowAchievements(true)}
+              className="p-4 bg-gradient-to-r from-purple-500/20 to-purple-700/20 border border-purple-500/30 rounded-2xl text-center"
+            >
+              <div className="text-purple-400 text-3xl mb-2">🏆</div>
+              <div className="text-purple-300 font-semibold text-sm">Achievements</div>
+              <div className="text-gray-400 text-xs mt-1">Track progress</div>
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowPremium(true)}
+              className="p-4 bg-gradient-to-r from-yellow-500/20 to-yellow-700/20 border border-yellow-500/30 rounded-2xl text-center"
+            >
+              <div className="text-yellow-400 text-3xl mb-2">👑</div>
+              <div className="text-yellow-300 font-semibold text-sm">Premium</div>
+              <div className="text-gray-400 text-xs mt-1">Unlock features</div>
+            </motion.button>
+          </div>
+        </motion.div>
       </div>
 
       {/* Enhanced Floating Bottom Navigation */}
@@ -357,6 +420,22 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
   
   if (showPlanner) {
     return <StudyPlanner onBack={() => setShowPlanner(false)} />;
+  }
+  
+  if (showNotifications) {
+    return <NotificationCenter onBack={() => setShowNotifications(false)} />;
+  }
+  
+  if (showPremium) {
+    return <PremiumSubscription onBack={() => setShowPremium(false)} />;
+  }
+  
+  if (showDiary) {
+    return <StudyDiary onBack={() => setShowDiary(false)} />;
+  }
+  
+  if (showAchievements) {
+    return <AchievementDashboard onBack={() => setShowAchievements(false)} />;
   }
 
   return (
