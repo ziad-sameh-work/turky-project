@@ -5,16 +5,19 @@ import { motion } from 'framer-motion';
 import { mockUniversities, mockUserProfile, Badge } from '@/data/mockData';
 import FloatingBottomNav from './FloatingBottomNav';
 import UserProfile from './UserProfile';
+import Sidebar from './Sidebar';
 
 interface StudentDashboardProps {
   userProfile: typeof mockUserProfile;
   badges: Badge[];
   onExplore?: () => void;
+  onNavigate?: (page: string) => void;
 }
 
-const StudentDashboard: React.FC<StudentDashboardProps> = ({ userProfile, badges, onExplore }) => {
+const StudentDashboard: React.FC<StudentDashboardProps> = ({ userProfile, badges, onExplore, onNavigate }) => {
   const [activeTab, setActiveTab] = useState('recommendations');
   const [showProfile, setShowProfile] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
 
   const earnedBadges = badges.filter(badge => badge.earned);
   const recommendations = mockUniversities.slice(0, 3);
@@ -49,14 +52,29 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userProfile, badges
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center justify-between mb-8"
         >
-          <div>
-            <h1 className="text-2xl font-black text-white">
-              Welcome back,
-              <span className="bg-gradient-to-r from-red-400 to-red-600 bg-clip-text text-transparent block">
-                {userProfile.name}! 🎓
-              </span>
-            </h1>
-            <p className="text-gray-400 text-sm mt-1">Ready to explore your future?</p>
+          <div className="flex items-center space-x-4">
+            {/* Sidebar Toggle Button */}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setShowSidebar(true)}
+              className="p-3 bg-gray-800/50 border border-gray-700/50 rounded-2xl backdrop-blur-sm hover:bg-gray-700/50 transition-colors"
+              title="Menu"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </motion.button>
+            
+            <div>
+              <h1 className="text-2xl font-black text-white">
+                Welcome back,
+                <span className="bg-gradient-to-r from-red-400 to-red-600 bg-clip-text text-transparent block">
+                  {userProfile.name}! 🎓
+                </span>
+              </h1>
+              <p className="text-gray-400 text-sm mt-1">Ready to explore your future?</p>
+            </div>
           </div>
           
           <motion.button
@@ -211,6 +229,21 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userProfile, badges
           ))}
         </motion.div>
       </div>
+
+      {/* Sidebar */}
+      <Sidebar
+        isOpen={showSidebar}
+        onClose={() => setShowSidebar(false)}
+        onNavigate={(page) => {
+          if (onNavigate) {
+            onNavigate(page);
+          } else if (page === 'explore' && onExplore) {
+            onExplore();
+          } else if (page === 'profile') {
+            setShowProfile(true);
+          }
+        }}
+      />
 
       {/* Profile Modal */}
       {showProfile && (
