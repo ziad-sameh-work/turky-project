@@ -7,7 +7,8 @@ import RestaurantPreferencesQuiz from './RestaurantPreferencesQuiz';
 import RestaurantList from './RestaurantList';
 import RestaurantDetails from './RestaurantDetails';
 import HotelWelcomeScreen from './HotelWelcomeScreen';
-import TouristTransportationFlow from './TouristTransportationFlow';
+import TransportationPage from './TransportationPage';
+import TravelTipsPage from './TravelTipsPage';
 import UserProfile from './UserProfile';
 import BadgeSystem from './BadgeSystem';
 import LanguageSelection from './LanguageSelection';
@@ -25,6 +26,7 @@ type TouristStep =
   | 'restaurants-details'
   | 'hotels'
   | 'transportation'
+  | 'travel-tips'
   | 'profile';
 
 interface TouristProfile {
@@ -75,8 +77,11 @@ const TouristOnboardingFlow: React.FC = () => {
       case 'hotels':
         setCurrentStep('hotels');
         break;
-      case 'transport':
+      case 'transportation':
         setCurrentStep('transportation');
+        break;
+      case 'travel-tips':
+        setCurrentStep('travel-tips');
         break;
       default:
         break;
@@ -160,14 +165,6 @@ const TouristOnboardingFlow: React.FC = () => {
     setCurrentStep('navigation');
   };
 
-  // Transportation handlers
-  const handleTransportationComplete = () => {
-    setCurrentStep('navigation');
-  };
-
-  const handleTransportationBack = () => {
-    setCurrentStep('navigation');
-  };
 
   // Back navigation
   const handleBack = () => {
@@ -358,10 +355,17 @@ const TouristOnboardingFlow: React.FC = () => {
 
         {/* Transportation Flow */}
         {currentStep === 'transportation' && (
-          <TouristTransportationFlow 
+          <TransportationPage 
             key="transportation" 
-            onComplete={handleTransportationComplete}
-            onBack={handleTransportationBack}
+            onBack={() => setCurrentStep('navigation')}
+          />
+        )}
+
+        {/* Travel Tips Flow */}
+        {currentStep === 'travel-tips' && (
+          <TravelTipsPage 
+            key="travel-tips" 
+            onBack={() => setCurrentStep('navigation')}
           />
         )}
 
