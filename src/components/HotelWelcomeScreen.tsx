@@ -11,9 +11,10 @@ interface HotelWelcomeScreenProps {
     rooms: number;
     guests: number;
   }) => void;
+  onBack?: () => void;
 }
 
-const HotelWelcomeScreen: React.FC<HotelWelcomeScreenProps> = ({ onNext }) => {
+const HotelWelcomeScreen: React.FC<HotelWelcomeScreenProps> = ({ onNext, onBack }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedDestination, setSelectedDestination] = useState('');
   const [checkIn, setCheckIn] = useState('');
@@ -214,6 +215,20 @@ const HotelWelcomeScreen: React.FC<HotelWelcomeScreenProps> = ({ onNext }) => {
       {/* Main Content */}
       <div className="relative z-10 flex flex-col min-h-screen px-8 pt-24">
         <div className="max-w-4xl mx-auto w-full">
+          {/* Back Button */}
+          {onBack && (
+            <motion.button
+              onClick={onBack}
+              className="absolute top-8 left-8 p-3 bg-gray-800/50 rounded-xl border border-gray-700/50 backdrop-blur-sm hover:bg-gray-700/50 transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+            >
+              <span className="text-white text-xl">←</span>
+            </motion.button>
+          )}
+
           {/* Header */}
           <motion.div 
             className="text-center mb-12"

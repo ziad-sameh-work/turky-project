@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import RestaurantWelcomeScreen from './RestaurantWelcomeScreen';
 import RestaurantPreferencesQuiz from './RestaurantPreferencesQuiz';
 import RestaurantList from './RestaurantList';
 import RestaurantDetails from './RestaurantDetails';
 import HotelWelcomeScreen from './HotelWelcomeScreen';
 import TransportationPage from './TransportationPage';
 import TravelTipsPage from './TravelTipsPage';
+import AttractionsPage from './AttractionsPage';
 import UserProfile from './UserProfile';
 import BadgeSystem from './BadgeSystem';
 import LanguageSelection from './LanguageSelection';
@@ -17,7 +17,6 @@ import { mockBadges, Restaurant, TouristPreferences, touristNavItems } from '@/d
 
 type TouristStep = 
   | 'navigation'
-  | 'restaurants-welcome' 
   | 'restaurants-quiz' 
   | 'restaurants-badge' 
   | 'restaurants-language' 
@@ -27,6 +26,7 @@ type TouristStep =
   | 'hotels'
   | 'transportation'
   | 'travel-tips'
+  | 'attractions'
   | 'profile';
 
 interface TouristProfile {
@@ -44,11 +44,6 @@ const TouristOnboardingFlow: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<TouristStep>('navigation');
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
-  const [initialSearchData, setInitialSearchData] = useState<{
-    cuisineType: string;
-    location: string;
-    priceRange: string;
-  } | undefined>();
   const [userPreferences, setUserPreferences] = useState<Record<string, string[]>>({});
   const [badges, setBadges] = useState(mockBadges);
   const [, setTouristProfile] = useState<TouristProfile>({
@@ -72,7 +67,22 @@ const TouristOnboardingFlow: React.FC = () => {
   const handleNavigationSelect = (option: string) => {
     switch (option) {
       case 'restaurants':
-        setCurrentStep('restaurants-welcome');
+        // Set default preferences and go directly to restaurant list
+        const defaultPreferences: TouristPreferences = {
+          cuisinePreferences: ['Turkish'],
+          budgetRange: 'midrange',
+          diningStyle: [],
+          dietaryRestrictions: [],
+          location: 'sultanahmet'
+        };
+        
+        setTouristProfile(prev => ({ ...prev, preferences: defaultPreferences }));
+        setUserPreferences({
+          '1': ['Turkish'],
+          '2': ['midrange'],
+          '3': ['sultanahmet']
+        });
+        setCurrentStep('restaurants-list');
         break;
       case 'hotels':
         setCurrentStep('hotels');
@@ -83,20 +93,14 @@ const TouristOnboardingFlow: React.FC = () => {
       case 'travel-tips':
         setCurrentStep('travel-tips');
         break;
+      case 'attractions':
+        setCurrentStep('attractions');
+        break;
       default:
         break;
     }
   };
 
-  // Restaurant flow handlers
-  const handleRestaurantWelcomeNext = (searchData: {
-    cuisineType: string;
-    location: string;
-    priceRange: string;
-  }) => {
-    setInitialSearchData(searchData);
-    setCurrentStep('restaurants-quiz');
-  };
 
   const handleRestaurantQuizComplete = (answers: Record<string, string[]>) => {
     setUserPreferences(answers);
@@ -117,7 +121,8 @@ const TouristOnboardingFlow: React.FC = () => {
         : badge
     ));
     
-    setCurrentStep('restaurants-badge');
+    // Skip to restaurant list directly after quiz completion
+    setCurrentStep('restaurants-list');
   };
 
   const handleRestaurantBadgeClose = () => {
@@ -170,7 +175,7 @@ const TouristOnboardingFlow: React.FC = () => {
   const handleBack = () => {
     switch (currentStep) {
       case 'restaurants-quiz':
-        setCurrentStep('restaurants-welcome');
+        setCurrentStep('navigation');
         break;
       case 'restaurants-language':
         setCurrentStep('restaurants-quiz');
@@ -179,14 +184,10 @@ const TouristOnboardingFlow: React.FC = () => {
         setCurrentStep('restaurants-language');
         break;
       case 'restaurants-list':
-        setCurrentStep('restaurants-signup');
+        setCurrentStep('navigation');
         break;
       case 'restaurants-details':
         setCurrentStep('restaurants-list');
-        break;
-      case 'hotels':
-      case 'transportation':
-        setCurrentStep('navigation');
         break;
       default:
         setCurrentStep('navigation');
@@ -209,8 +210,21 @@ const TouristOnboardingFlow: React.FC = () => {
             exit={{ opacity: 0 }}
           >
             <div className="relative z-10 flex flex-col min-h-screen px-8 pt-16">
-              {/* Profile Button */}
-              <div className="absolute top-8 right-8">
+              {/* Header with Back and Profile Buttons */}
+              <div className="absolute top-8 left-8 right-8 flex justify-between items-center">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => {
+                    // Navigate back to user type selection in OnboardingFlow
+                    window.location.href = '/';
+                  }}
+                  className="w-12 h-12 bg-gradient-to-r from-gray-600 to-gray-800 rounded-2xl flex items-center justify-center shadow-lg"
+                  title="Back"
+                >
+                  <span className="text-white text-xl">←</span>
+                </motion.button>
+                
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
@@ -240,28 +254,33 @@ const TouristOnboardingFlow: React.FC = () => {
                   Choose your adventure and discover the best of Turkey
                 </motion.p>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                <div className="flex flex-col items-center space-y-6 max-w-md mx-auto">
                   {touristNavItems.map((item, index) => (
                     <motion.button
                       key={item.id}
                       onClick={() => handleNavigationSelect(item.id)}
-                      className={`p-8 rounded-2xl border-2 border-gray-700 bg-gradient-to-br from-blue-500 to-purple-600 bg-opacity-10 hover:bg-opacity-20 transition-all duration-300 group`}
+                      className={`p-6 rounded-2xl border-2 border-gray-700 bg-gradient-to-br from-blue-500 to-purple-600 bg-opacity-10 hover:bg-opacity-20 transition-all duration-300 group w-full`}
                       initial={{ y: 50, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ delay: 0.4 + index * 0.1, duration: 0.6 }}
                       whileHover={{ scale: 1.05, y: -10 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">
-                        {item.icon}
+                      <div className="flex items-center space-x-4">
+                        <div className="text-4xl group-hover:scale-110 transition-transform">
+                          {item.icon}
+                        </div>
+                        <div className="text-left">
+                          <h3 className="text-xl font-bold text-white mb-1">{item.name}</h3>
+                          <p className="text-gray-400 text-sm">
+                            {item.id === 'restaurants' && 'Discover amazing Turkish cuisine'}
+                            {item.id === 'hotels' && 'Find the perfect place to stay'}
+                            {item.id === 'transportation' && 'Navigate Istanbul with ease'}
+                            {item.id === 'attractions' && 'Explore historical sites'}
+                            {item.id === 'travel-tips' && 'Complete guide for your journey'}
+                          </p>
+                        </div>
                       </div>
-                      <h3 className="text-2xl font-bold text-white mb-2">{item.name}</h3>
-                      <p className="text-gray-400">
-                        {item.id === 'restaurants' && 'Discover amazing Turkish cuisine'}
-                        {item.id === 'hotels' && 'Find the perfect place to stay'}
-                        {item.id === 'transport' && 'Navigate Istanbul with ease'}
-                        {item.id === 'attractions' && 'Explore historical sites'}
-                      </p>
                     </motion.button>
                   ))}
                 </div>
@@ -270,17 +289,12 @@ const TouristOnboardingFlow: React.FC = () => {
           </motion.div>
         )}
 
-        {/* Restaurant Flow */}
-        {currentStep === 'restaurants-welcome' && (
-          <RestaurantWelcomeScreen key="restaurant-welcome" onNext={handleRestaurantWelcomeNext} />
-        )}
         
         {currentStep === 'restaurants-quiz' && (
           <RestaurantPreferencesQuiz 
             key="restaurant-quiz" 
             onComplete={handleRestaurantQuizComplete} 
             onBack={handleBack}
-            initialSearchData={initialSearchData}
           />
         )}
         
@@ -331,7 +345,6 @@ const TouristOnboardingFlow: React.FC = () => {
             onRestaurantSelect={handleRestaurantSelect}
             onBack={handleBack}
             userPreferences={userPreferences}
-            initialSearchData={initialSearchData}
           />
         )}
         
@@ -350,6 +363,7 @@ const TouristOnboardingFlow: React.FC = () => {
           <HotelWelcomeScreen 
             key="hotels" 
             onNext={handleHotelSearch}
+            onBack={() => setCurrentStep('navigation')}
           />
         )}
 
@@ -365,6 +379,14 @@ const TouristOnboardingFlow: React.FC = () => {
         {currentStep === 'travel-tips' && (
           <TravelTipsPage 
             key="travel-tips" 
+            onBack={() => setCurrentStep('navigation')}
+          />
+        )}
+
+        {/* Attractions Flow */}
+        {currentStep === 'attractions' && (
+          <AttractionsPage 
+            key="attractions" 
             onBack={() => setCurrentStep('navigation')}
           />
         )}

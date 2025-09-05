@@ -32,9 +32,10 @@ interface EmergencyContact {
 interface AdditionalInfoProps {
   sections?: InfoSection[];
   emergencyContacts?: EmergencyContact[];
+  onBack?: () => void;
 }
 
-const AdditionalInfo: React.FC<AdditionalInfoProps> = ({ sections, emergencyContacts }) => {
+const AdditionalInfo: React.FC<AdditionalInfoProps> = ({ sections, emergencyContacts, onBack }) => {
   const [activeSection, setActiveSection] = useState<string>('laws');
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
@@ -301,6 +302,21 @@ const AdditionalInfo: React.FC<AdditionalInfoProps> = ({ sections, emergencyCont
 
   return (
     <div className="space-y-6">
+      {/* Back Button */}
+      {onBack && (
+        <motion.button
+          onClick={onBack}
+          className="flex items-center space-x-2 p-3 bg-gray-800/50 rounded-xl border border-gray-700/50 backdrop-blur-sm hover:bg-gray-700/50 transition-colors mb-4"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
+          <span className="text-white text-xl">←</span>
+          <span className="text-white text-sm">Back</span>
+        </motion.button>
+      )}
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

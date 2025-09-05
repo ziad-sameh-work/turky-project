@@ -172,7 +172,95 @@ const RestaurantList: React.FC<RestaurantListProps> = ({
           </motion.button>
         </motion.div>
 
-        {/* Filters Panel */}
+        {/* Quick Filters Bar - Always Visible */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 bg-gray-800/40 border border-gray-700/30 rounded-2xl backdrop-blur-sm p-4"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Cuisine Filter */}
+            <div>
+              <h3 className="text-white font-semibold mb-2 text-sm">Cuisine</h3>
+              <select 
+                value={filters.cuisineType[0] || ''}
+                onChange={(e) => setFilters(prev => ({ 
+                  ...prev, 
+                  cuisineType: e.target.value ? [e.target.value] : [] 
+                }))}
+                className="w-full p-2 rounded-lg bg-gray-700/50 border border-gray-600/50 text-white text-sm focus:border-orange-500/50 focus:outline-none"
+              >
+                <option value="">All Cuisines</option>
+                {cuisineOptions.map((cuisine) => (
+                  <option key={cuisine} value={cuisine.toLowerCase()}>{cuisine}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Price Range Filter */}
+            <div>
+              <h3 className="text-white font-semibold mb-2 text-sm">Price Range</h3>
+              <select 
+                value={filters.priceRange[0] || ''}
+                onChange={(e) => setFilters(prev => ({ 
+                  ...prev, 
+                  priceRange: e.target.value ? [e.target.value] : [] 
+                }))}
+                className="w-full p-2 rounded-lg bg-gray-700/50 border border-gray-600/50 text-white text-sm focus:border-orange-500/50 focus:outline-none"
+              >
+                <option value="">All Prices</option>
+                {priceOptions.map((price) => (
+                  <option key={price.value} value={price.value}>{price.label}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Location/District Filter */}
+            <div>
+              <h3 className="text-white font-semibold mb-2 text-sm">Location</h3>
+              <select 
+                value=""
+                onChange={(e) => {
+                  // Filter by district
+                  if (e.target.value) {
+                    setFilters(prev => ({ ...prev, district: e.target.value }));
+                  }
+                }}
+                className="w-full p-2 rounded-lg bg-gray-700/50 border border-gray-600/50 text-white text-sm focus:border-orange-500/50 focus:outline-none"
+              >
+                <option value="">All Areas</option>
+                <option value="sultanahmet">Sultanahmet</option>
+                <option value="taksim">Taksim</option>
+                <option value="etiler">Etiler</option>
+                <option value="beyoglu">Beyoğlu</option>
+                <option value="galata">Galata</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Clear Filters Button */}
+          <div className="mt-4 flex justify-between items-center">
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setFilters({
+                cuisineType: [],
+                priceRange: [],
+                rating: 0,
+                distance: 10,
+                features: []
+              })}
+              className="px-4 py-2 bg-gray-700/50 text-gray-300 rounded-lg text-sm hover:bg-gray-700/70 transition-colors"
+            >
+              Clear All Filters
+            </motion.button>
+            
+            <div className="text-orange-400 text-sm font-medium">
+              {filteredAndSortedRestaurants.length} restaurants found
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Advanced Filters Panel */}
         <AnimatePresence>
           {showFilters && (
             <motion.div
@@ -195,7 +283,7 @@ const RestaurantList: React.FC<RestaurantListProps> = ({
                       <motion.button
                         key={sort.value}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => setSortBy(sort.value as any)}
+                        onClick={() => setSortBy(sort.value as 'nearest' | 'cheapest' | 'rating' | 'popular')}
                         className={`p-2 rounded-xl text-sm transition-all duration-300 ${
                           sortBy === sort.value
                             ? 'bg-orange-500/20 border border-orange-500/50 text-white'

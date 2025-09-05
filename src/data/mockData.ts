@@ -2288,12 +2288,11 @@ export const mockTouristDashboard: TouristDashboardData = {
   }
 };
 
-// Update touristNavItems to include profile and travel tips
+// Update touristNavItems for tourist navigation
 export const touristNavItems = [
   { id: 'restaurants', name: 'Restaurants', icon: '🍽️', href: '/tourist/restaurants' },
   { id: 'hotels', name: 'Hotels', icon: '🏨', href: '/tourist/hotels' },
   { id: 'transportation', name: 'Transportation', icon: '🚌', href: '/tourist/transportation' },
   { id: 'attractions', name: 'Attractions', icon: '🏛️', href: '/tourist/attractions' },
-  { id: 'travel-tips', name: 'Travel Tips', icon: '📚', href: '/tourist/travel-tips' },
-  { id: 'profile', name: 'Profile', icon: '👤', href: '/tourist/profile' }
+  { id: 'travel-tips', name: 'Travel Tips', icon: '📚', href: '/tourist/travel-tips' }
 ];
