@@ -16,6 +16,7 @@ import PersonalInfoSection from './PersonalInfoSection';
 import PointsSystemSection from './PointsSystemSection';
 import UniversityStatusSection from './UniversityStatusSection';
 import DocumentUploadSection from './DocumentUploadSection';
+import DigitalWalletSection from './DigitalWalletSection';
 import type { UserProfile, PersonalInfo, UniversityStatus } from '../data/userProfileData';
 
 interface UserProfileProps {
@@ -25,12 +26,12 @@ interface UserProfileProps {
 
 const UserProfile: React.FC<UserProfileProps> = ({ onBack, userType = 'student' }) => {
   const [userProfile, setUserProfile] = useState<UserProfile>(mockUserProfile);
-  const [activeSection, setActiveSection] = useState<'personal' | 'points' | 'university' | 'documents'>('personal');
+  const [activeSection, setActiveSection] = useState<'personal' | 'points' | 'university' | 'documents' | 'wallet'>('personal');
 
   // Filter sections based on user type
   const availableSections = userType === 'student' ? 
-    ['personal', 'points', 'university', 'documents'] : 
-    ['personal', 'points', 'documents'];
+    ['personal', 'points', 'university', 'documents', 'wallet'] : 
+    ['personal', 'points', 'documents', 'wallet'];
 
   const handlePersonalInfoSave = (updatedInfo: PersonalInfo) => {
     setUserProfile(prev => ({
@@ -115,6 +116,46 @@ const UserProfile: React.FC<UserProfileProps> = ({ onBack, userType = 'student' 
     console.log('Document deleted:', documentType);
   };
 
+  const handleWalletTopUp = (amount: number, paymentMethodId: string) => {
+    // Simulate wallet top-up
+    const newTransaction = {
+      id: `txn-${Date.now()}`,
+      type: 'topup' as const,
+      amount: amount,
+      currency: 'TRY' as const,
+      description: 'Wallet Top-up',
+      category: 'other' as const,
+      status: 'completed' as const,
+      paymentMethod: paymentMethodId,
+      date: new Date().toISOString(),
+      isOnline: true,
+      pointsEarned: Math.floor(amount * 0.05)
+    };
+
+    setUserProfile(prev => ({
+      ...prev,
+      digitalWallet: {
+        ...prev.digitalWallet,
+        balance: {
+          ...prev.digitalWallet.balance,
+          totalBalance: prev.digitalWallet.balance.totalBalance + amount,
+          availableBalance: prev.digitalWallet.balance.availableBalance + amount,
+          lastUpdated: new Date().toISOString()
+        },
+        transactions: [newTransaction, ...prev.digitalWallet.transactions]
+      },
+      pointsSystem: {
+        ...prev.pointsSystem,
+        currentPoints: prev.pointsSystem.currentPoints + (newTransaction.pointsEarned || 0),
+        totalEarnedPoints: prev.pointsSystem.totalEarnedPoints + (newTransaction.pointsEarned || 0)
+      },
+      updatedAt: new Date().toISOString()
+    }));
+    
+    console.log('Wallet topped up:', amount, paymentMethodId);
+  };
+
+
   const allSections = [
     {
       id: 'personal',
@@ -143,6 +184,13 @@ const UserProfile: React.FC<UserProfileProps> = ({ onBack, userType = 'student' 
       icon: <div className="text-lg">📄</div>,
       color: 'from-green-500 to-green-700',
       description: 'Upload verification documents'
+    },
+    {
+      id: 'wallet',
+      name: 'Digital Wallet',
+      icon: <div className="text-lg">💰</div>,
+      color: 'from-indigo-500 to-indigo-700',
+      description: 'Manage payments and transactions'
     }
   ];
 
@@ -284,6 +332,13 @@ const UserProfile: React.FC<UserProfileProps> = ({ onBack, userType = 'student' 
               documents={userProfile.documents}
               onUpload={handleDocumentUpload}
               onDelete={handleDocumentDelete}
+            />
+          )}
+          
+          {activeSection === 'wallet' && (
+            <DigitalWalletSection
+              digitalWallet={userProfile.digitalWallet}
+              onTopUpWallet={handleWalletTopUp}
             />
           )}
         </div>

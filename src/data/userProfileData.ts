@@ -6,6 +6,7 @@ export interface UserProfile {
   pointsSystem: PointsSystemData;
   universityStatus: UniversityStatus;
   documents: UserDocuments;
+  digitalWallet: DigitalWallet;
   preferences: UserPreferences;
   createdAt: string;
   updatedAt: string;
@@ -108,6 +109,76 @@ export interface NotificationPreferences {
   marketing: boolean;
   bookingUpdates: boolean;
   pointsUpdates: boolean;
+}
+
+export interface DigitalWallet {
+  balance: WalletBalance;
+  paymentMethods: PaymentMethod[];
+  transactions: Transaction[];
+  settings: WalletSettings;
+  limits: WalletLimits;
+}
+
+export interface WalletBalance {
+  totalBalance: number;
+  availableBalance: number;
+  pendingBalance: number;
+  currency: 'TRY' | 'USD' | 'EUR';
+  lastUpdated: string;
+}
+
+export interface PaymentMethod {
+  id: string;
+  type: 'credit_card' | 'debit_card' | 'bank_account' | 'digital_wallet' | 'crypto';
+  name: string;
+  lastFour?: string;
+  expiryDate?: string;
+  bankName?: string;
+  isDefault: boolean;
+  isActive: boolean;
+  addedDate: string;
+  verificationStatus: 'pending' | 'verified' | 'failed';
+}
+
+export interface Transaction {
+  id: string;
+  type: 'payment' | 'refund' | 'transfer' | 'topup' | 'withdrawal' | 'reward';
+  amount: number;
+  currency: 'TRY' | 'USD' | 'EUR';
+  description: string;
+  merchant?: string;
+  category: 'restaurant' | 'transportation' | 'accommodation' | 'shopping' | 'entertainment' | 'education' | 'other';
+  status: 'pending' | 'completed' | 'failed' | 'cancelled';
+  paymentMethod?: string;
+  date: string;
+  location?: string;
+  isOnline: boolean;
+  receiptUrl?: string;
+  pointsEarned?: number;
+}
+
+export interface WalletSettings {
+  autoTopup: boolean;
+  autoTopupAmount: number;
+  autoTopupThreshold: number;
+  notifications: {
+    transactions: boolean;
+    lowBalance: boolean;
+    monthlyStatement: boolean;
+  };
+  security: {
+    requirePinForPayments: boolean;
+    requireBiometric: boolean;
+    maxDailySpend: number;
+  };
+}
+
+export interface WalletLimits {
+  dailySpendLimit: number;
+  monthlySpendLimit: number;
+  singleTransactionLimit: number;
+  dailyWithdrawalLimit: number;
+  monthlyTopupLimit: number;
 }
 
 // Mock User Profile Data
@@ -256,6 +327,140 @@ export const mockUserProfile: UserProfile = {
       fileSize: 1536000,
       uploadDate: '2024-01-18',
       verificationStatus: 'pending'
+    }
+  },
+  digitalWallet: {
+    balance: {
+      totalBalance: 1250.75,
+      availableBalance: 1150.75,
+      pendingBalance: 100.00,
+      currency: 'TRY',
+      lastUpdated: '2024-03-25T14:30:00Z'
+    },
+    paymentMethods: [
+      {
+        id: 'pm-001',
+        type: 'credit_card',
+        name: 'Visa **** 4532',
+        lastFour: '4532',
+        expiryDate: '12/26',
+        bankName: 'Garanti BBVA',
+        isDefault: true,
+        isActive: true,
+        addedDate: '2024-01-15',
+        verificationStatus: 'verified'
+      },
+      {
+        id: 'pm-002',
+        type: 'bank_account',
+        name: 'İş Bankası Checking',
+        bankName: 'Türkiye İş Bankası',
+        isDefault: false,
+        isActive: true,
+        addedDate: '2024-02-01',
+        verificationStatus: 'verified'
+      },
+      {
+        id: 'pm-003',
+        type: 'digital_wallet',
+        name: 'Papara Wallet',
+        isDefault: false,
+        isActive: true,
+        addedDate: '2024-02-15',
+        verificationStatus: 'verified'
+      }
+    ],
+    transactions: [
+      {
+        id: 'txn-001',
+        type: 'payment',
+        amount: -45.50,
+        currency: 'TRY',
+        description: 'Restaurant Payment - Pandeli',
+        merchant: 'Pandeli Restaurant',
+        category: 'restaurant',
+        status: 'completed',
+        paymentMethod: 'pm-001',
+        date: '2024-03-25T12:30:00Z',
+        location: 'Sultanahmet, Istanbul',
+        isOnline: false,
+        pointsEarned: 23
+      },
+      {
+        id: 'txn-002',
+        type: 'payment',
+        amount: -12.75,
+        currency: 'TRY',
+        description: 'Metro Card Top-up',
+        merchant: 'İETT',
+        category: 'transportation',
+        status: 'completed',
+        paymentMethod: 'pm-001',
+        date: '2024-03-24T08:15:00Z',
+        location: 'Taksim Metro Station',
+        isOnline: false,
+        pointsEarned: 6
+      },
+      {
+        id: 'txn-003',
+        type: 'topup',
+        amount: 200.00,
+        currency: 'TRY',
+        description: 'Wallet Top-up',
+        category: 'other',
+        status: 'completed',
+        paymentMethod: 'pm-002',
+        date: '2024-03-23T14:20:00Z',
+        isOnline: true,
+        pointsEarned: 10
+      },
+      {
+        id: 'txn-004',
+        type: 'payment',
+        amount: -85.25,
+        currency: 'TRY',
+        description: 'Online Shopping - Amazon Turkey',
+        merchant: 'Amazon Turkey',
+        category: 'shopping',
+        status: 'completed',
+        paymentMethod: 'pm-001',
+        date: '2024-03-22T16:45:00Z',
+        isOnline: true,
+        pointsEarned: 43
+      },
+      {
+        id: 'txn-005',
+        type: 'reward',
+        amount: 25.00,
+        currency: 'TRY',
+        description: 'Points Redemption Bonus',
+        category: 'other',
+        status: 'completed',
+        date: '2024-03-21T10:00:00Z',
+        isOnline: true
+      }
+    ],
+    settings: {
+      autoTopup: true,
+      autoTopupAmount: 100.00,
+      autoTopupThreshold: 50.00,
+      notifications: {
+        transactions: true,
+        lowBalance: true,
+        monthlyStatement: true
+      },
+      security: {
+        requirePinForPayments: true,
+        requireBiometric: false,
+        maxDailySpend: 500.00
+      }
+    },
+    limits: {
+      dailySpendLimit: 500.00,
+      monthlySpendLimit: 5000.00,
+      singleTransactionLimit: 1000.00,
+      dailyWithdrawalLimit: 1000.00,
+      monthlyTopupLimit: 10000.00
     }
   },
   preferences: {

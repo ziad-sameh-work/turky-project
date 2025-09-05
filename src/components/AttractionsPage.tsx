@@ -483,7 +483,7 @@ const AttractionsPage: React.FC<AttractionsPageProps> = ({ onBack }) => {
             )}
             <div>
               <h1 className="text-3xl font-bold text-white">Tourist Attractions</h1>
-              <p className="text-gray-400">Discover Istanbul's most iconic landmarks</p>
+              <p className="text-gray-400">Discover Istanbul&apos;s most iconic landmarks</p>
             </div>
           </div>
         </motion.div>

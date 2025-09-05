@@ -18,7 +18,6 @@ interface RestaurantListProps {
 const RestaurantList: React.FC<RestaurantListProps> = ({ 
   onRestaurantSelect, 
   onBack, 
-  userPreferences,
   initialSearchData 
 }) => {
   const [showFilters, setShowFilters] = useState(false);
@@ -37,16 +36,17 @@ const RestaurantList: React.FC<RestaurantListProps> = ({
     { value: 'midrange', label: '₺₺ (₺100-300)', symbol: '₺₺' },
     { value: 'luxury', label: '₺₺₺ (₺300+)', symbol: '₺₺₺' }
   ];
-  const featureOptions = [
-    { value: 'delivery', label: 'Delivery Available', icon: '🚚' },
-    { value: 'outdoor', label: 'Outdoor Seating', icon: '🌤️' },
-    { value: 'family', label: 'Family Friendly', icon: '👨‍👩‍👧‍👦' },
-    { value: 'music', label: 'Live Music', icon: '🎵' },
-    { value: 'halal', label: 'Halal Options', icon: '☪️' }
-  ];
+  // Feature options for future use
+  // const featureOptions = [
+  //   { value: 'delivery', label: 'Delivery Available', icon: '🚚' },
+  //   { value: 'outdoor', label: 'Outdoor Seating', icon: '🌤️' },
+  //   { value: 'family', label: 'Family Friendly', icon: '👨‍👩‍👧‍👦' },
+  //   { value: 'music', label: 'Live Music', icon: '🎵' },
+  //   { value: 'halal', label: 'Halal Options', icon: '☪️' }
+  // ];
 
   const filteredAndSortedRestaurants = useMemo(() => {
-    let filtered = mockRestaurants.filter(restaurant => {
+    const filtered = mockRestaurants.filter(restaurant => {
       // Cuisine filter
       if (filters.cuisineType.length > 0) {
         const hasMatchingCuisine = filters.cuisineType.some(cuisine => 
