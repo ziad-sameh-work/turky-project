@@ -18,9 +18,17 @@ import NotificationCenter from './NotificationCenter';
 import PremiumSubscription from './PremiumSubscription';
 import StudyDiary from './StudyDiary';
 import AchievementDashboard from './AchievementDashboard';
+import TouristProfileDashboard from './TouristProfileDashboard';
+import { mockTouristDashboard } from '@/data/mockData';
 
 interface ExplorationDashboardProps {
-  userProfile: any;
+  userProfile: {
+    name: string;
+    email: string;
+    userType: string;
+    preferences?: Record<string, string>;
+    language?: string;
+  };
   onBack: () => void;
 }
 
@@ -37,6 +45,7 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
   const [showPremium, setShowPremium] = useState(false);
   const [showDiary, setShowDiary] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const [selectedUniversityId, setSelectedUniversityId] = useState<string>('');
 
   const handleUniversitySelect = (universityId: string) => {
@@ -81,7 +90,7 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
         return (
           <VirtualCampusTour
             universityId={selectedUniversityId}
-            onBack={() => setCurrentView('admission')}
+            onBack={() => setCurrentView('dashboard')}
           />
         );
       default:
@@ -93,15 +102,15 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black relative overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 opacity-5">
-        <motion.div 
+        <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
-          className="absolute top-1/4 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" 
+          className="absolute top-1/4 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"
         />
-        <motion.div 
+        <motion.div
           animate={{ rotate: -360 }}
           transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-1/4 left-0 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" 
+          className="absolute bottom-1/4 left-0 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl"
         />
       </div>
 
@@ -123,14 +132,14 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
 
           <div className="text-center">
             <h1 className="text-2xl font-black text-white">
-              Explore
+              Welcome, {userProfile.name}
               <span className="bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent block">
-                Turkey
+                Explore Turkey
               </span>
             </h1>
             <p className="text-gray-400 text-sm">Discover your perfect university</p>
           </div>
-          
+
           <motion.div
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
@@ -191,7 +200,7 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
                 <div className={`w-14 h-14 rounded-2xl bg-gradient-to-r ${item.color} flex items-center justify-center text-2xl shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                   {item.icon}
                 </div>
-                
+
                 <div className="flex-1 text-left">
                   <h3 className="text-white font-bold text-lg">{item.name}</h3>
                   <p className="text-gray-400 text-sm">
@@ -201,7 +210,7 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
                     {item.id === 'community' && 'Connect with students and get advice'}
                   </p>
                 </div>
-                
+
                 <motion.div
                   animate={{ x: [0, 5, 0] }}
                   transition={{ repeat: Infinity, duration: 2 }}
@@ -212,6 +221,7 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
               </div>
             </motion.button>
           ))}
+
         </motion.div>
 
         {/* Featured Universities */}
@@ -232,7 +242,7 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
               View All →
             </motion.button>
           </div>
-          
+
           <div className="flex space-x-4 overflow-x-auto pb-2">
             {['Istanbul Technical University', 'Boğaziçi University', 'METU'].map((uni, index) => (
               <motion.div
@@ -276,7 +286,7 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
               <div className="text-blue-300 font-semibold text-sm">AI Assistant</div>
               <div className="text-gray-400 text-xs mt-1">Ask about universities</div>
             </motion.button>
-            
+
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -287,7 +297,7 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
               <div className="text-green-300 font-semibold text-sm">Community</div>
               <div className="text-gray-400 text-xs mt-1">Connect with students</div>
             </motion.button>
-            
+
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -298,7 +308,7 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
               <div className="text-orange-300 font-semibold text-sm">Housing Guide</div>
               <div className="text-gray-400 text-xs mt-1">Find dorms & apartments</div>
             </motion.button>
-            
+
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -350,7 +360,7 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
               <div className="text-red-300 font-semibold text-sm">Notifications</div>
               <div className="text-gray-400 text-xs mt-1">Stay updated</div>
             </motion.button>
-            
+
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -361,7 +371,7 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
               <div className="text-pink-300 font-semibold text-sm">Study Diary</div>
               <div className="text-gray-400 text-xs mt-1">Document journey</div>
             </motion.button>
-            
+
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -372,7 +382,7 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
               <div className="text-purple-300 font-semibold text-sm">Achievements</div>
               <div className="text-gray-400 text-xs mt-1">Track progress</div>
             </motion.button>
-            
+
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -393,8 +403,12 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
         onTabChange={(tabId: string) => {
           if (tabId === 'home') {
             onBack();
+          } else if (tabId === 'profile') {
+            setShowProfile(true);
+          } else if (tabId === 'favorites') {
+            // Handle favorites navigation
+            console.log('Favorites clicked');
           }
-          // Handle other navigation as needed
         }}
         variant="dashboard"
       />
@@ -436,6 +450,10 @@ const ExplorationDashboard: React.FC<ExplorationDashboardProps> = ({ userProfile
   
   if (showAchievements) {
     return <AchievementDashboard onBack={() => setShowAchievements(false)} />;
+  }
+  
+  if (showProfile) {
+    return <TouristProfileDashboard dashboardData={mockTouristDashboard} onClose={() => setShowProfile(false)} />;
   }
 
   return (

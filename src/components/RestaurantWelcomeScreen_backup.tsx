@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface RestaurantWelcomeScreenProps {
@@ -174,6 +174,123 @@ const RestaurantWelcomeScreen: React.FC<RestaurantWelcomeScreenProps> = ({ onNex
         <div className="absolute bottom-1/4 left-0 w-96 h-96 bg-orange-600/5 rounded-full blur-3xl animate-pulse delay-1000" />
       </div>
 
+      {/* Floating Food Particles */}
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(15)].map((_, i) => {
+          const xPos = (i * 45) % 400;
+          const yPos = (i * 73) % 800;
+          const duration = 3 + (i % 3);
+          const delay = (i * 0.15) % 2;
+          
+          return (
+            <motion.div
+              key={i}
+              className="absolute text-2xl opacity-20"
+              initial={{ 
+                x: xPos, 
+                y: yPos,
+                opacity: 0,
+                rotate: 0
+              }}
+              animate={{ 
+                y: [yPos, yPos - 150, yPos - 300],
+                opacity: [0, 0.3, 0],
+                rotate: [0, 180, 360]
+              }}
+              transition={{
+                duration: duration,
+                repeat: Infinity,
+                delay: delay
+              }}
+            >
+              {['🥙', '🍖', '🧄', '🌶️', '🫒'][i % 5]}
+            </motion.div>
+          );
+        })}
+      </div>
+
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 text-center">
+        {/* Logo/Brand */}
+        <motion.div
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ duration: 1, type: "spring", bounce: 0.5 }}
+          className="mb-8"
+        >
+          <div className="w-24 h-24 bg-gradient-to-br from-orange-500 to-orange-700 rounded-2xl flex items-center justify-center shadow-2xl shadow-orange-500/25">
+            <span className="text-4xl font-bold text-white">🍽️</span>
+          </div>
+        </motion.div>
+
+        {/* Main Title */}
+        <motion.h1
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.8 }}
+          className="text-5xl font-black text-white mb-4 leading-tight"
+        >
+          Taste
+          <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent block">
+            Turkey
+          </span>
+        </motion.h1>
+
+        {/* Subtitle */}
+        <motion.p
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8, duration: 0.8 }}
+          className="text-xl text-gray-300 mb-8 max-w-md leading-relaxed"
+        >
+          Discover authentic flavors, from street food to fine dining
+        </motion.p>
+
+    <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 text-center">
+      {/* Logo/Brand */}
+      <motion.div
+        initial={{ scale: 0, rotate: -180 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{ duration: 1, type: "spring", bounce: 0.5 }}
+        className="mb-8"
+      >
+        <div className="w-24 h-24 bg-gradient-to-br from-orange-500 to-orange-700 rounded-2xl flex items-center justify-center shadow-2xl shadow-orange-500/25">
+          <span className="text-4xl font-bold text-white">🍽️</span>
+        </div>
+      </motion.div>
+
+      {/* Main Title */}
+      <motion.h1
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.8 }}
+        className="text-5xl font-black text-white mb-4 leading-tight"
+      >
+        Taste
+        <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent block">
+          Turkey
+        </span>
+      </motion.h1>
+
+      {/* Subtitle */}
+      <motion.p
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8, duration: 0.8 }}
+        className="text-xl text-gray-300 mb-8 max-w-md leading-relaxed"
+      >
+        Discover authentic flavors, from street food to fine dining
+      </motion.p>
+
+      {/* Hero Food Image Carousel */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+      >
+        <div className="w-full h-96 bg-orange-500/50 rounded-2xl flex items-center justify-center shadow-2xl shadow-orange-500/25">
+          <span className="text-4xl font-bold text-white">🍴</span>
+        </div>
+      </motion.div>
+
       {/* Main Content */}
       <div className="relative z-10 flex flex-col min-h-screen px-8 pt-24">
         <div className="max-w-4xl mx-auto w-full">
@@ -225,6 +342,20 @@ const RestaurantWelcomeScreen: React.FC<RestaurantWelcomeScreenProps> = ({ onNex
             </div>
           </div>
         </div>
+            {[...Array(3)].map((_, i) => (
+              <motion.div
+                key={i}
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ 
+                  repeat: Infinity, 
+                  duration: 1.5, 
+                  delay: i * 0.2 
+                }}
+                className="w-2 h-2 bg-orange-500/50 rounded-full"
+              />
+            ))}
+          </div>
+        </motion.div>
       </div>
     </div>
   );

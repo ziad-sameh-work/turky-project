@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { mockUniversities, mockUserProfile, Badge } from '@/data/mockData';
 import FloatingBottomNav from './FloatingBottomNav';
+import UserProfile from './UserProfile';
 
 interface StudentDashboardProps {
   userProfile: typeof mockUserProfile;
@@ -13,6 +14,7 @@ interface StudentDashboardProps {
 
 const StudentDashboard: React.FC<StudentDashboardProps> = ({ userProfile, badges, onExplore }) => {
   const [activeTab, setActiveTab] = useState('recommendations');
+  const [showProfile, setShowProfile] = useState(false);
 
   const earnedBadges = badges.filter(badge => badge.earned);
   const recommendations = mockUniversities.slice(0, 3);
@@ -57,13 +59,15 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userProfile, badges
             <p className="text-gray-400 text-sm mt-1">Ready to explore your future?</p>
           </div>
           
-          <motion.div
+          <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
+            onClick={() => setShowProfile(true)}
             className="w-12 h-12 bg-gradient-to-r from-red-500 to-red-700 rounded-2xl flex items-center justify-center shadow-lg"
+            title="Profile"
           >
             <span className="text-white text-xl">👤</span>
-          </motion.div>
+          </motion.button>
         </motion.div>
 
         {/* Badges Section */}
@@ -195,7 +199,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userProfile, badges
             { label: 'Universities', value: '150+', icon: '🏛️' },
             { label: 'Programs', value: '500+', icon: '📚' },
             { label: 'Students', value: '10K+', icon: '👥' }
-          ].map((stat, index) => (
+          ].map((stat) => (
             <div
               key={stat.label}
               className="p-4 bg-gray-800/40 border border-gray-700/30 rounded-2xl backdrop-blur-sm text-center"
@@ -207,6 +211,17 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userProfile, badges
           ))}
         </motion.div>
       </div>
+
+      {/* Profile Modal */}
+      {showProfile && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto">
+          <div className="min-h-full flex items-start justify-center p-4">
+            <div className="w-full max-w-4xl">
+              <UserProfile onBack={() => setShowProfile(false)} />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Enhanced Floating Bottom Navigation */}
       <FloatingBottomNav
