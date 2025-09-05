@@ -6,17 +6,69 @@ import type { DigitalWallet, PaymentMethod, Transaction } from '../data/userProf
 
 interface DigitalWalletSectionProps {
   digitalWallet: DigitalWallet;
-  onTopUpWallet?: (amount: number, paymentMethodId: string) => void;
+  onTopUpWallet: (amount: number, paymentMethodId: string) => void;
+  onHideBottomNav?: (hide: boolean) => void;
+  onAddTransaction?: (transaction: Transaction) => void;
 }
 
 const DigitalWalletSection: React.FC<DigitalWalletSectionProps> = ({
   digitalWallet,
-  onTopUpWallet
+  onTopUpWallet,
+  onHideBottomNav,
+  onAddTransaction
 }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'payments' | 'settings'>('overview');
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState('');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
+  const [showPinModal, setShowPinModal] = useState(false);
+  const [showSendMoneyModal, setShowSendMoneyModal] = useState(false);
+  const [pin, setPin] = useState(['', '', '', '', '', '']);
+  const [pinError, setPinError] = useState('');
+  
+  // Hide bottom nav when modals are open
+  React.useEffect(() => {
+    if (onHideBottomNav) {
+      onHideBottomNav(showPinModal || showSendMoneyModal || showTopUpModal);
+    }
+  }, [showPinModal, showSendMoneyModal, showTopUpModal, onHideBottomNav]);
+  const [sendMoneyData, setSendMoneyData] = useState({
+    recipientName: '',
+    recipientIBAN: '',
+    recipientID: '',
+    recipientBank: '',
+    amount: '',
+    currency: 'TRY' as 'TRY' | 'USD' | 'EUR',
+    description: ''
+  });
+
+  const turkishBanks = [
+    { code: 'GARANTI', name: 'Garanti BBVA', fullName: 'Türkiye Garanti Bankası A.Ş.' },
+    { code: 'ISBANK', name: 'İş Bankası', fullName: 'Türkiye İş Bankası A.Ş.' },
+    { code: 'AKBANK', name: 'Akbank', fullName: 'Akbank T.A.Ş.' },
+    { code: 'YAPI_KREDI', name: 'Yapı Kredi', fullName: 'Yapı ve Kredi Bankası A.Ş.' },
+    { code: 'ZIRAAT', name: 'Ziraat Bankası', fullName: 'Türkiye Cumhuriyeti Ziraat Bankası A.Ş.' },
+    { code: 'HALKBANK', name: 'Halkbank', fullName: 'Türkiye Halk Bankası A.Ş.' },
+    { code: 'VAKIFBANK', name: 'VakıfBank', fullName: 'Türkiye Vakıflar Bankası T.A.O.' },
+    { code: 'DENIZBANK', name: 'DenizBank', fullName: 'DenizBank A.Ş.' },
+    { code: 'TEB', name: 'TEB', fullName: 'Türk Ekonomi Bankası A.Ş.' },
+    { code: 'ING', name: 'ING Bank', fullName: 'ING Bank A.Ş.' },
+    { code: 'QNB', name: 'QNB Finansbank', fullName: 'QNB Finansbank A.Ş.' },
+    { code: 'HSBC', name: 'HSBC', fullName: 'HSBC Bank A.Ş.' },
+    { code: 'FIBABANKA', name: 'Fibabanka', fullName: 'Fibabanka A.Ş.' },
+    { code: 'ODEABANK', name: 'Odeabank', fullName: 'Odeabank A.Ş.' },
+    { code: 'SEKERBANK', name: 'Şekerbank', fullName: 'Şekerbank T.A.Ş.' },
+    { code: 'TURKIYE_FINANS', name: 'Türkiye Finans', fullName: 'Türkiye Finans Katılım Bankası A.Ş.' },
+    { code: 'KUVEYT_TURK', name: 'Kuveyt Türk', fullName: 'Kuveyt Türk Katılım Bankası A.Ş.' },
+    { code: 'ALBARAKA', name: 'Albaraka Türk', fullName: 'Albaraka Türk Katılım Bankası A.Ş.' },
+    { code: 'ZIRAAT_KATILIM', name: 'Ziraat Katılım', fullName: 'Ziraat Katılım Bankası A.Ş.' },
+    { code: 'VAKIF_KATILIM', name: 'Vakıf Katılım', fullName: 'Vakıf Katılım Bankası A.Ş.' },
+    { code: 'EMLAK_KATILIM', name: 'Emlak Katılım', fullName: 'Türkiye Emlak Katılım Bankası A.Ş.' },
+    { code: 'BURGAN', name: 'Burgan Bank', fullName: 'Burgan Bank A.Ş.' },
+    { code: 'ICBC', name: 'ICBC Turkey', fullName: 'Industrial and Commercial Bank of China Turkey A.Ş.' },
+    { code: 'MUFG', name: 'MUFG Bank', fullName: 'MUFG Bank Turkey A.Ş.' },
+    { code: 'INTESA', name: 'Intesa Sanpaolo', fullName: 'Intesa Sanpaolo S.p.A. İstanbul Şubesi' }
+  ];
   // const [showAddPaymentModal, setShowAddPaymentModal] = useState(false);
 
   const formatCurrency = (amount: number, currency: string = 'TRY') => {
@@ -67,6 +119,103 @@ const DigitalWalletSection: React.FC<DigitalWalletSectionProps> = ({
       setSelectedPaymentMethod('');
     }
   };
+
+  const validateIBAN = (iban: string) => {
+    // Basic Turkish IBAN validation (TR + 24 digits)
+    const ibanRegex = /^TR\d{24}$/;
+    return ibanRegex.test(iban.replace(/\s/g, ''));
+  };
+
+  const validateTurkishID = (id: string) => {
+    // Basic Turkish ID validation (11 digits)
+    const idRegex = /^\d{11}$/;
+    return idRegex.test(id);
+  };
+
+  const handlePinInput = (index: number, value: string) => {
+    if (value.length > 1) return; // Only allow single digit
+    if (!/^\d*$/.test(value)) return; // Only allow numbers
+    
+    const newPin = [...pin];
+    newPin[index] = value;
+    setPin(newPin);
+    
+    // Auto-focus next input
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`pin-${index + 1}`);
+      nextInput?.focus();
+    }
+  };
+
+  const handlePinKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !pin[index] && index > 0) {
+      const prevInput = document.getElementById(`pin-${index - 1}`);
+      prevInput?.focus();
+    }
+  };
+
+  const verifyPin = () => {
+    const enteredPin = pin.join('');
+    // In a real app, this would verify against stored PIN
+    if (enteredPin === '123456') { // Demo PIN
+      setPinError('');
+      setShowPinModal(false);
+      
+      // Execute the actual send money operation
+      const amount = parseFloat(sendMoneyData.amount);
+      const convertedAmount = sendMoneyData.currency === 'TRY' 
+        ? amount 
+        : amount * (sendMoneyData.currency === 'USD' ? 32 : 35);
+      
+      // Create new transaction
+      const newTransaction = {
+        id: `tx_${Date.now()}`,
+        type: 'transfer' as const,
+        category: 'other' as const,
+        amount: convertedAmount,
+        currency: 'TRY' as const,
+        description: sendMoneyData.description || `Transfer to ${sendMoneyData.recipientName}`,
+        date: new Date().toISOString(),
+        status: 'completed' as const,
+        recipient: {
+          name: sendMoneyData.recipientName,
+          iban: sendMoneyData.recipientIBAN,
+          bank: sendMoneyData.recipientBank
+        },
+        location: 'Online Transfer',
+        merchant: 'Digital Wallet',
+        isOnline: true,
+        pointsEarned: 0
+      };
+      
+      // Update wallet balance and add transaction
+      onTopUpWallet(-convertedAmount, 'wallet_balance');
+      
+      // Add transaction to history
+      if (onAddTransaction) {
+        onAddTransaction(newTransaction);
+      }
+      console.log('Transaction completed:', newTransaction);
+      
+      setShowSendMoneyModal(false);
+      setSendMoneyData({
+        recipientName: '',
+        recipientIBAN: '',
+        recipientID: '',
+        recipientBank: '',
+        amount: '',
+        currency: 'TRY',
+        description: ''
+      });
+      setPin(['', '', '', '', '', '']);
+      
+      // Show success message
+      alert(`Successfully sent ${formatCurrency(amount, sendMoneyData.currency)} to ${sendMoneyData.recipientName}`);
+    } else {
+      setPinError('Incorrect PIN. Please try again.');
+    }
+  };
+
 
   const tabs = [
     { id: 'overview', name: 'Overview', icon: '📊' },
@@ -129,13 +278,9 @@ const DigitalWalletSection: React.FC<DigitalWalletSectionProps> = ({
         </div>
 
         <div className="flex space-x-3">
-          <button
-            onClick={() => setShowTopUpModal(true)}
-            className="flex-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg py-2 px-4 text-sm font-medium transition-colors"
-          >
-            ⬆️ Top Up
-          </button>
-          <button className="flex-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg py-2 px-4 text-sm font-medium transition-colors">
+          <button 
+            onClick={() => setShowPinModal(true)}
+            className="flex-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg py-2 px-4 text-sm font-medium transition-colors">
             📤 Send Money
           </button>
           <button className="flex-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg py-2 px-4 text-sm font-medium transition-colors">
@@ -602,10 +747,10 @@ const DigitalWalletSection: React.FC<DigitalWalletSectionProps> = ({
 
               <div className="flex space-x-3 mt-6">
                 <button
-                  onClick={() => setShowTopUpModal(false)}
-                  className="flex-1 bg-gray-700 hover:bg-gray-600 text-white rounded-lg py-2 px-4 transition-colors"
+                  onClick={() => setShowSendMoneyModal(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2 px-4 transition-colors"
                 >
-                  Cancel
+                  💸 Send Money
                 </button>
                 <button
                   onClick={handleTopUp}
@@ -613,6 +758,257 @@ const DigitalWalletSection: React.FC<DigitalWalletSectionProps> = ({
                   className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg py-2 px-4 transition-colors"
                 >
                   Top Up
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* PIN Verification Modal */}
+        {showPinModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-gray-800 rounded-xl p-6 w-full max-w-md mx-4"
+            >
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  🔒
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Enter PIN Code</h3>
+                <p className="text-gray-400">Enter your 6-digit PIN to continue</p>
+              </div>
+
+              <div className="flex justify-center space-x-3 mb-4">
+                {pin.map((digit, index) => (
+                  <input
+                    key={index}
+                    id={`pin-${index}`}
+                    type="password"
+                    value={digit}
+                    onChange={(e) => handlePinInput(index, e.target.value)}
+                    onKeyDown={(e) => handlePinKeyDown(index, e)}
+                    maxLength={1}
+                    className="w-12 h-12 bg-gray-700 border border-gray-600 rounded-lg text-center text-white text-xl font-bold focus:border-blue-500 focus:outline-none"
+                  />
+                ))}
+              </div>
+
+              {pinError && (
+                <p className="text-red-400 text-sm text-center mb-4">{pinError}</p>
+              )}
+
+              <div className="text-center mb-6">
+                <p className="text-gray-400 text-sm">For testing: Use PIN 123456</p>
+              </div>
+
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => {
+                    setShowPinModal(false);
+                    setPin(['', '', '', '', '', '']);
+                    setPinError('');
+                  }}
+                  className="flex-1 bg-gray-700 hover:bg-gray-600 text-white rounded-lg py-3 px-4 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={verifyPin}
+                  disabled={pin.some(digit => !digit)}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg py-3 px-4 transition-colors"
+                >
+                  Confirm
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* Send Money Modal */}
+        {showSendMoneyModal && (
+          <motion.div
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-gray-800 rounded-xl p-6 w-full max-w-md"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+            >
+              <h3 className="text-xl font-bold text-white mb-4">📤 Send Money</h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Recipient Name *</label>
+                  <input
+                    type="text"
+                    value={sendMoneyData.recipientName}
+                    onChange={(e) => setSendMoneyData(prev => ({...prev, recipientName: e.target.value}))}
+                    placeholder="Enter recipient full name"
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Recipient Bank *</label>
+                  <select
+                    value={sendMoneyData.recipientBank}
+                    onChange={(e) => setSendMoneyData(prev => ({...prev, recipientBank: e.target.value}))}
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                  >
+                    <option value="">Select recipient&apos;s bank</option>
+                    {turkishBanks.map((bank) => (
+                      <option key={bank.code} value={bank.code}>
+                        {bank.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">IBAN Number *</label>
+                  <input
+                    type="text"
+                    value={sendMoneyData.recipientIBAN}
+                    onChange={(e) => setSendMoneyData(prev => ({...prev, recipientIBAN: e.target.value.toUpperCase()}))}
+                    placeholder="TR00 0000 0000 0000 0000 0000 00"
+                    maxLength={26}
+                    className={`w-full bg-gray-700 border rounded-lg px-3 py-2 text-white ${
+                      sendMoneyData.recipientIBAN && !validateIBAN(sendMoneyData.recipientIBAN) 
+                        ? 'border-red-500' : 'border-gray-600'
+                    }`}
+                  />
+                  {sendMoneyData.recipientIBAN && !validateIBAN(sendMoneyData.recipientIBAN) && (
+                    <p className="text-red-400 text-xs mt-1">Invalid IBAN format</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">ID Number *</label>
+                  <input
+                    type="text"
+                    value={sendMoneyData.recipientID}
+                    onChange={(e) => setSendMoneyData(prev => ({...prev, recipientID: e.target.value}))}
+                    placeholder="Enter 11-digit Turkish ID"
+                    maxLength={11}
+                    className={`w-full bg-gray-700 border rounded-lg px-3 py-2 text-white ${
+                      sendMoneyData.recipientID && !validateTurkishID(sendMoneyData.recipientID) 
+                        ? 'border-red-500' : 'border-gray-600'
+                    }`}
+                  />
+                  {sendMoneyData.recipientID && !validateTurkishID(sendMoneyData.recipientID) && (
+                    <p className="text-red-400 text-xs mt-1">Invalid ID number (must be 11 digits)</p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-2">Currency *</label>
+                    <select
+                      value={sendMoneyData.currency}
+                      onChange={(e) => setSendMoneyData(prev => ({...prev, currency: e.target.value as 'TRY' | 'USD' | 'EUR'}))}
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                    >
+                      <option value="TRY">🇹🇷 Turkish Lira (₺)</option>
+                      <option value="USD">🇺🇸 US Dollar ($)</option>
+                      <option value="EUR">🇪🇺 Euro (€)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-2">Amount *</label>
+                    <input
+                      type="number"
+                      value={sendMoneyData.amount}
+                      onChange={(e) => setSendMoneyData(prev => ({...prev, amount: e.target.value}))}
+                      placeholder="0.00"
+                      min="1"
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                    />
+                  </div>
+                </div>
+                <div className="bg-gray-700/50 rounded-lg p-3">
+                  <p className="text-xs text-gray-400 mb-1">Available Balance:</p>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-white">₺{digitalWallet.balance.availableBalance.toFixed(2)}</span>
+                    {sendMoneyData.currency !== 'TRY' && (
+                      <span className="text-gray-400">
+                        ≈ {formatCurrency(
+                          sendMoneyData.currency === 'USD' 
+                            ? digitalWallet.balance.availableBalance / 32 
+                            : digitalWallet.balance.availableBalance / 35, 
+                          sendMoneyData.currency
+                        )}
+                      </span>
+                    )}
+                  </div>
+                  {sendMoneyData.amount && sendMoneyData.currency !== 'TRY' && (
+                    <div className="mt-2 pt-2 border-t border-gray-600">
+                      <p className="text-xs text-gray-400">Estimated conversion:</p>
+                      <p className="text-sm text-blue-400">
+                        {formatCurrency(parseFloat(sendMoneyData.amount), sendMoneyData.currency)} 
+                        ≈ ₺{(parseFloat(sendMoneyData.amount) * (sendMoneyData.currency === 'USD' ? 32 : 35)).toFixed(2)}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Description (Optional)</label>
+                  <input
+                    type="text"
+                    value={sendMoneyData.description}
+                    onChange={(e) => setSendMoneyData(prev => ({...prev, description: e.target.value}))}
+                    placeholder="Payment description"
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="flex space-x-3 mt-6">
+                <button
+                  onClick={() => {
+                    setShowSendMoneyModal(false);
+                    setSendMoneyData({
+                      recipientName: '',
+                      recipientIBAN: '',
+                      recipientID: '',
+                      recipientBank: '',
+                      amount: '',
+                      currency: 'TRY',
+                      description: ''
+                    });
+                  }}
+                  className="flex-1 bg-gray-700 hover:bg-gray-600 text-white rounded-lg py-2 px-4 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => setShowPinModal(true)}
+                  disabled={
+                    !sendMoneyData.recipientName || 
+                    !sendMoneyData.recipientBank ||
+                    !validateIBAN(sendMoneyData.recipientIBAN) || 
+                    !validateTurkishID(sendMoneyData.recipientID) || 
+                    !sendMoneyData.amount ||
+                    (sendMoneyData.currency === 'TRY' 
+                      ? parseFloat(sendMoneyData.amount) > digitalWallet.balance.availableBalance
+                      : (parseFloat(sendMoneyData.amount) * (sendMoneyData.currency === 'USD' ? 32 : 35)) > digitalWallet.balance.availableBalance
+                    )
+                  }
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg py-2 px-4 transition-colors"
+                >
+                  Send Money
                 </button>
               </div>
             </motion.div>

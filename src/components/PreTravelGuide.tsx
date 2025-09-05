@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { TravelGuide, VisaRequirement, InsuranceProvider, Vaccination, DocumentChecklistItem } from '../data/mockData';
+import type { TravelGuide, VisaRequirement, DocumentChecklistItem } from '../data/mockData';
 
 interface PreTravelGuideProps {
   travelGuide: TravelGuide;
@@ -90,7 +90,7 @@ const PreTravelGuide: React.FC<PreTravelGuideProps> = ({ travelGuide }) => {
           </div>
           <div>
             <h2 className="text-xl font-semibold text-white">Visa Requirements</h2>
-            <p className="text-sm text-gray-400">Check your country's visa requirements</p>
+            <p className="text-sm text-gray-400">Check your country&apos;s visa requirements</p>
           </div>
         </div>
 

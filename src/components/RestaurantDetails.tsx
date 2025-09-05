@@ -161,7 +161,7 @@ const RestaurantDetails: React.FC<RestaurantDetailsProps> = ({
                 key={tab.id}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => setActiveTab(tab.id as 'overview' | 'menu' | 'reviews')}
                 className={`flex-1 py-3 px-4 rounded-xl transition-all duration-300 ${
                   activeTab === tab.id
                     ? 'bg-orange-500/20 text-orange-300 border border-orange-500/30'

@@ -339,6 +339,21 @@ const UserProfile: React.FC<UserProfileProps> = ({ onBack, userType = 'student' 
             <DigitalWalletSection
               digitalWallet={userProfile.digitalWallet}
               onTopUpWallet={handleWalletTopUp}
+              onHideBottomNav={() => {}}
+              onAddTransaction={(transaction) => {
+                setUserProfile(prev => ({
+                  ...prev,
+                  digitalWallet: {
+                    ...prev.digitalWallet,
+                    transactions: [transaction, ...prev.digitalWallet.transactions],
+                    balance: {
+                      ...prev.digitalWallet.balance,
+                      availableBalance: prev.digitalWallet.balance.availableBalance - transaction.amount,
+                      totalBalance: prev.digitalWallet.balance.totalBalance - transaction.amount
+                    }
+                  }
+                }));
+              }}
             />
           )}
         </div>

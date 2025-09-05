@@ -15,6 +15,19 @@ interface ForumPost {
   replies: Reply[];
   tags: string[];
   isLiked: boolean;
+  type: 'post' | 'question' | 'event';
+  media?: {
+    type: 'image' | 'video';
+    url: string;
+  }[];
+  isReported?: boolean;
+  bestAnswer?: string; // For Q&A posts
+  eventDetails?: {
+    date: string;
+    location: string;
+    price: number;
+    registrationLink?: string;
+  };
 }
 
 interface Reply {
@@ -25,10 +38,39 @@ interface Reply {
   timestamp: Date;
   likes: number;
   isLiked: boolean;
+  isBestAnswer?: boolean;
+  points?: number;
 }
 
 interface CommunityForumProps {
   onBack: () => void;
+}
+
+interface LanguagePartner {
+  id: string;
+  name: string;
+  avatar: string;
+  nativeLanguage: string;
+  learningLanguage: string;
+  level: 'Beginner' | 'Intermediate' | 'Advanced';
+  city: string;
+  interests: string[];
+  isOnline: boolean;
+}
+
+interface Event {
+  id: string;
+  title: string;
+  type: 'trip' | 'workshop' | 'conference' | 'meetup';
+  description: string;
+  date: string;
+  location: string;
+  price: number;
+  maxParticipants: number;
+  currentParticipants: number;
+  organizer: string;
+  image: string;
+  tags: string[];
 }
 
 const CommunityForum: React.FC<CommunityForumProps> = ({ onBack }) => {
@@ -62,6 +104,7 @@ const CommunityForum: React.FC<CommunityForumProps> = ({ onBack }) => {
         }
       ],
       tags: ['METU', 'Dorm Life', 'Tips'],
+      type: 'post',
       isLiked: true
     },
     {
@@ -84,6 +127,7 @@ const CommunityForum: React.FC<CommunityForumProps> = ({ onBack }) => {
         }
       ],
       tags: ['YÖS', 'Study Group', 'Engineering'],
+      type: 'question',
       isLiked: false
     },
     {
@@ -96,24 +140,162 @@ const CommunityForum: React.FC<CommunityForumProps> = ({ onBack }) => {
       likes: 67,
       replies: [],
       tags: ['Scholarships', 'Success Story', 'Türkiye Scholarship'],
+      type: 'post',
       isLiked: true
+    },
+    {
+      id: '4',
+      author: 'Fatma S.',
+      avatar: '🎪',
+      title: 'Istanbul Cultural Tour - This Weekend!',
+      content: 'Join us for an amazing cultural tour of Istanbul\'s historic districts! 🏛️\n\n📅 Date: Saturday, March 15th\n⏰ Time: 9:00 AM - 6:00 PM\n📍 Meeting Point: Sultanahmet Square\n💰 Cost: 150 TL (includes lunch & guide)\n\nWe\'ll visit:\n• Hagia Sophia\n• Blue Mosque\n• Grand Bazaar\n• Topkapi Palace\n\nLimited spots available!',
+      timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000),
+      likes: 42,
+      replies: [],
+      tags: ['Event', 'Istanbul', 'Culture', 'Tour'],
+      type: 'event',
+      eventDetails: {
+        date: '2024-03-15',
+        location: 'Istanbul Historic Districts',
+        price: 150,
+        registrationLink: 'https://example.com/register'
+      },
+      isLiked: false
     }
   ]);
 
+  const [activeTab, setActiveTab] = useState<'posts' | 'questions' | 'events' | 'language'>('posts');
   const [newPostTitle, setNewPostTitle] = useState('');
   const [newPostContent, setNewPostContent] = useState('');
+  const [newPostType] = useState<'post' | 'question' | 'event'>('post');
   const [showNewPost, setShowNewPost] = useState(false);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Language Exchange & Friends Data
+  const [languagePartners] = useState<LanguagePartner[]>([
+    {
+      id: '1',
+      name: 'Ahmed Hassan',
+      avatar: '🧑‍💻',
+      nativeLanguage: 'Arabic',
+      learningLanguage: 'Turkish',
+      level: 'Intermediate',
+      city: 'Istanbul',
+      interests: ['Technology', 'Travel', 'Food'],
+      isOnline: true
+    },
+    {
+      id: '2',
+      name: 'Maria Rodriguez',
+      avatar: '👩‍🎨',
+      nativeLanguage: 'Spanish',
+      learningLanguage: 'English',
+      level: 'Advanced',
+      city: 'Ankara',
+      interests: ['Art', 'Music', 'Culture'],
+      isOnline: false
+    },
+    {
+      id: '3',
+      name: 'Chen Wei',
+      avatar: '👨‍🔬',
+      nativeLanguage: 'Chinese',
+      learningLanguage: 'Turkish',
+      level: 'Beginner',
+      city: 'Izmir',
+      interests: ['Science', 'Sports', 'Movies'],
+      isOnline: true
+    }
+  ]);
+
+  const [events] = useState<Event[]>([
+    {
+      id: '1',
+      title: 'Istanbul Cultural Tour',
+      type: 'trip',
+      description: 'Explore the historic districts of Istanbul with fellow students',
+      date: '2024-03-15',
+      location: 'Istanbul Historic Districts',
+      price: 150,
+      maxParticipants: 25,
+      currentParticipants: 18,
+      organizer: 'Student Cultural Club',
+      image: '🏛️',
+      tags: ['Culture', 'History', 'Istanbul']
+    },
+    {
+      id: '2',
+      title: 'Turkish Language Workshop',
+      type: 'workshop',
+      description: 'Intensive Turkish language practice session for beginners',
+      date: '2024-03-20',
+      location: 'METU Language Center',
+      price: 0,
+      maxParticipants: 15,
+      currentParticipants: 8,
+      organizer: 'Language Exchange Club',
+      image: '📚',
+      tags: ['Language', 'Turkish', 'Learning']
+    },
+    {
+      id: '3',
+      title: 'International Student Conference',
+      type: 'conference',
+      description: 'Annual conference for international students in Turkey',
+      date: '2024-04-05',
+      location: 'Ankara Convention Center',
+      price: 75,
+      maxParticipants: 200,
+      currentParticipants: 142,
+      organizer: 'International Student Association',
+      image: '🎤',
+      tags: ['Conference', 'Networking', 'Education']
+    }
+  ]);
+
   const handleRefresh = async () => {
     setRefreshing(true);
-    // Simulate refresh delay
     setTimeout(() => {
       setRefreshing(false);
     }, 1000);
+  };
+
+  const filteredPosts = posts.filter(post => {
+    if (activeTab === 'posts') return post.type === 'post';
+    if (activeTab === 'questions') return post.type === 'question';
+    if (activeTab === 'events') return post.type === 'event';
+    return true;
+  });
+
+
+
+
+  const markBestAnswer = (postId: string, replyId: string) => {
+    setPosts(prev => prev.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          bestAnswer: replyId,
+          replies: post.replies.map(reply => ({
+            ...reply,
+            isBestAnswer: reply.id === replyId,
+            points: reply.id === replyId ? (reply.points || 0) + 50 : reply.points
+          }))
+        };
+      }
+      return post;
+    }));
+  };
+
+  const sendFriendRequest = (partnerId: string) => {
+    alert(`Friend request sent to ${languagePartners.find(p => p.id === partnerId)?.name}!`);
+  };
+
+  const registerForEvent = (eventId: string) => {
+    alert(`Successfully registered for ${events.find(e => e.id === eventId)?.title}!`);
   };
 
   const handleLike = (postId: string, replyId?: string) => {
@@ -153,6 +335,7 @@ const CommunityForum: React.FC<CommunityForumProps> = ({ onBack }) => {
       likes: 0,
       replies: [],
       tags: ['Question'],
+      type: newPostType,
       isLiked: false
     };
 
@@ -254,6 +437,33 @@ const CommunityForum: React.FC<CommunityForumProps> = ({ onBack }) => {
         </div>
       </motion.div>
 
+      {/* Tab Navigation */}
+      <div className="relative z-10 px-6 mb-6">
+        <div className="flex space-x-2 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-2">
+          {[
+            { key: 'posts', label: 'Posts', icon: '📝' },
+            { key: 'questions', label: 'Q&A', icon: '❓' },
+            { key: 'events', label: 'Events', icon: '🎉' },
+            { key: 'language', label: 'Language', icon: '🗣️' }
+          ].map((tab) => (
+            <motion.button
+              key={tab.key}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setActiveTab(tab.key as 'posts' | 'questions' | 'events' | 'language')}
+              className={`flex-1 flex items-center justify-center space-x-1 py-2 px-3 rounded-xl transition-all ${
+                activeTab === tab.key
+                  ? 'bg-gradient-to-r from-green-500 to-green-600 text-white'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+              }`}
+            >
+              <span className="text-sm">{tab.icon}</span>
+              <span className="text-xs font-medium hidden sm:block">{tab.label}</span>
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
       {/* Pull to Refresh Indicator */}
       <AnimatePresence>
         {refreshing && (
@@ -275,7 +485,7 @@ const CommunityForum: React.FC<CommunityForumProps> = ({ onBack }) => {
         )}
       </AnimatePresence>
 
-      {/* Forum Posts */}
+      {/* Content Based on Active Tab */}
       <div 
         ref={scrollRef}
         className="relative z-10 px-6 pb-32 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto"
@@ -291,8 +501,10 @@ const CommunityForum: React.FC<CommunityForumProps> = ({ onBack }) => {
           document.addEventListener('touchmove', handleTouchMove, { once: true });
         }}
       >
-        <AnimatePresence>
-          {posts.map((post, index) => (
+        {/* Posts & Questions Content */}
+        {(activeTab === 'posts' || activeTab === 'questions') && (
+          <AnimatePresence>
+            {filteredPosts.map((post, index) => (
             <motion.div
               key={post.id}
               initial={{ opacity: 0, y: 20 }}
@@ -446,9 +658,510 @@ const CommunityForum: React.FC<CommunityForumProps> = ({ onBack }) => {
                   </motion.div>
                 )}
               </AnimatePresence>
+
+              {/* Q&A Specific Features */}
+              {activeTab === 'questions' && post.type === 'question' && (
+                <div className="mt-4 pt-4 border-t border-gray-700/50">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm text-yellow-400 font-medium">❓ Question</span>
+                    {post.bestAnswer && (
+                      <span className="text-sm text-green-400 font-medium">✅ Answered</span>
+                    )}
+                  </div>
+                  
+                  {/* Best Answer Highlight */}
+                  {post.bestAnswer && post.replies.find(r => r.id === post.bestAnswer) && (
+                    <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-4">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <span className="text-green-400">🏆</span>
+                        <span className="text-sm font-medium text-green-400">Best Answer</span>
+                        <span className="text-xs text-green-400/70">+50 points</span>
+                      </div>
+                      {(() => {
+                        const bestReply = post.replies.find(r => r.id === post.bestAnswer);
+                        return bestReply ? (
+                          <div>
+                            <div className="flex items-center space-x-2 mb-2">
+                              <span className="text-lg">{bestReply.avatar}</span>
+                              <span className="text-sm font-medium text-white">{bestReply.author}</span>
+                            </div>
+                            <p className="text-gray-300 text-sm">{bestReply.content}</p>
+                          </div>
+                        ) : null;
+                      })()}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Reply Input for Questions */}
+              <AnimatePresence>
+                {replyingTo === post.id && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mt-4 pt-4 border-t border-gray-700/50"
+                  >
+                    <textarea
+                      value={replyContent}
+                      onChange={(e) => setReplyContent(e.target.value)}
+                      placeholder={post.type === 'question' ? "Share your answer..." : "Write a reply..."}
+                      className="w-full p-3 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-green-500/50 focus:ring-2 focus:ring-green-500/20 resize-none mb-3"
+                      rows={3}
+                    />
+                    <div className="flex space-x-2">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleSubmitReply(post.id)}
+                        disabled={!replyContent.trim()}
+                        className="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 rounded-xl text-white text-sm font-medium disabled:opacity-50"
+                      >
+                        {post.type === 'question' ? 'Submit Answer' : 'Reply'}
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setReplyingTo(null)}
+                        className="px-4 py-2 bg-gray-600/50 rounded-xl text-white text-sm font-medium"
+                      >
+                        Cancel
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Enhanced Replies with Best Answer Selection */}
+              <AnimatePresence>
+                {post.replies.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mt-4 pt-4 border-t border-gray-700/50 space-y-3"
+                  >
+                    {post.replies.map((reply) => (
+                      <div 
+                        key={reply.id} 
+                        className={`p-4 rounded-xl ${
+                          reply.isBestAnswer 
+                            ? 'bg-green-500/10 border border-green-500/30' 
+                            : 'bg-gray-700/30'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-lg">{reply.avatar}</span>
+                            <div>
+                              <span className="text-sm font-medium text-white">{reply.author}</span>
+                              {reply.isBestAnswer && (
+                                <span className="ml-2 text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">
+                                  Best Answer
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            {post.type === 'question' && !post.bestAnswer && post.author === 'Ahmad (You)' && (
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => markBestAnswer(post.id, reply.id)}
+                                className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full hover:bg-yellow-500/30"
+                              >
+                                Mark as Best
+                              </motion.button>
+                            )}
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => handleLike(post.id, reply.id)}
+                              className={`flex items-center space-x-1 text-xs px-2 py-1 rounded-full ${
+                                reply.isLiked 
+                                  ? 'bg-red-500/20 text-red-400' 
+                                  : 'bg-gray-600/50 text-gray-400'
+                              }`}
+                            >
+                              <span>❤️</span>
+                              <span>{reply.likes}</span>
+                            </motion.button>
+                          </div>
+                        </div>
+                        <p className="text-gray-300 text-sm">{reply.content}</p>
+                        <p className="text-xs text-gray-500 mt-2">{formatTimeAgo(reply.timestamp)}</p>
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           ))}
-        </AnimatePresence>
+          </AnimatePresence>
+        )}
+
+        {/* Events Content */}
+        {activeTab === 'events' && (
+          <div className="space-y-4">
+            {events.map((event, index) => (
+              <motion.div
+                key={event.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-gray-800/80 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-2xl">
+                      {event.image}
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-white">{event.title}</h3>
+                      <p className="text-sm text-gray-400">{event.organizer}</p>
+                    </div>
+                  </div>
+                  <span className="px-3 py-1 bg-purple-500/20 text-purple-400 text-xs rounded-full">
+                    {event.type}
+                  </span>
+                </div>
+                
+                <p className="text-gray-300 mb-4">{event.description}</p>
+                
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <p className="text-xs text-gray-400">Date</p>
+                    <p className="text-sm text-white">{event.date}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Location</p>
+                    <p className="text-sm text-white">{event.location}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Price</p>
+                    <p className="text-sm text-white">{event.price === 0 ? 'Free' : `${event.price} TL`}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Participants</p>
+                    <p className="text-sm text-white">{event.currentParticipants}/{event.maxParticipants}</p>
+                  </div>
+                </div>
+                
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => registerForEvent(event.id)}
+                  className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white font-medium"
+                >
+                  Register for Event
+                </motion.button>
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        {/* Language Exchange Content - New Design */}
+        {activeTab === 'language' && (
+          <div className="space-y-6">
+            {/* Search Filters Section */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 backdrop-blur-sm border border-purple-500/30 rounded-3xl p-6"
+            >
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                  🔍
+                </div>
+                <h3 className="text-lg font-bold text-white">Find Your Language Partner</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-xs text-purple-300 mb-2 block">Learning Language</label>
+                  <select className="w-full p-3 bg-purple-800/30 border border-purple-500/30 rounded-xl text-white text-sm focus:outline-none focus:border-purple-400">
+                    <option>Turkish</option>
+                    <option>English</option>
+                    <option>Arabic</option>
+                    <option>Spanish</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-purple-300 mb-2 block">Your Level</label>
+                  <select className="w-full p-3 bg-purple-800/30 border border-purple-500/30 rounded-xl text-white text-sm focus:outline-none focus:border-purple-400">
+                    <option>Beginner</option>
+                    <option>Intermediate</option>
+                    <option>Advanced</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-purple-300 mb-2 block">City/University</label>
+                  <select className="w-full p-3 bg-purple-800/30 border border-purple-500/30 rounded-xl text-white text-sm focus:outline-none focus:border-purple-400">
+                    <option>Istanbul</option>
+                    <option>Ankara</option>
+                    <option>Izmir</option>
+                    <option>Online Only</option>
+                  </select>
+                </div>
+              </div>
+              
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full mt-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white font-medium shadow-lg shadow-purple-500/25"
+              >
+                🚀 Search Partners
+              </motion.button>
+            </motion.div>
+
+            {/* Daily Culture Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-gradient-to-r from-orange-900/40 to-yellow-900/40 backdrop-blur-sm border border-orange-500/30 rounded-3xl p-6"
+            >
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full flex items-center justify-center">
+                  🌍
+                </div>
+                <h3 className="text-lg font-bold text-white">Culture of the Day</h3>
+              </div>
+              
+              <div className="bg-orange-800/20 rounded-2xl p-4 mb-4">
+                <h4 className="text-white font-semibold mb-2">🇹🇷 Turkish Tradition: Tea Culture</h4>
+                <p className="text-orange-200 text-sm leading-relaxed">
+                  In Turkey, tea (çay) is more than just a drink - it&apos;s a symbol of hospitality and friendship. 
+                  Served in small tulip-shaped glasses, Turkish tea is offered to guests as a warm welcome gesture.
+                </p>
+              </div>
+              
+              <div className="flex space-x-2">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex-1 py-2 bg-orange-500/20 text-orange-300 rounded-xl text-sm font-medium"
+                >
+                  📚 Read More
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex-1 py-2 bg-yellow-500/20 text-yellow-300 rounded-xl text-sm font-medium"
+                >
+                  🎯 Share Your Culture
+                </motion.button>
+              </div>
+            </motion.div>
+
+            {/* Language Partners Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {languagePartners.map((partner, index) => (
+                <motion.div
+                  key={partner.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.1 + 0.2 }}
+                  className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 backdrop-blur-sm border border-cyan-500/30 rounded-3xl p-6 hover:border-cyan-400/50 transition-all duration-300"
+                >
+                  {/* Partner Header */}
+                  <div className="flex items-center space-x-4 mb-4">
+                    <div className="relative">
+                      <div className="w-16 h-16 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center text-2xl shadow-lg">
+                        {partner.avatar}
+                      </div>
+                      {partner.isOnline && (
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-3 border-gray-900 shadow-lg"></div>
+                      )}
+                      <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-xs">
+                        ⭐
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-white">{partner.name}</h3>
+                      <p className="text-cyan-300 text-sm">📍 {partner.city}</p>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          partner.level === 'Beginner' ? 'bg-red-500/20 text-red-300' :
+                          partner.level === 'Intermediate' ? 'bg-yellow-500/20 text-yellow-300' :
+                          'bg-green-500/20 text-green-300'
+                        }`}>
+                          {partner.level}
+                        </span>
+                        {partner.isOnline && (
+                          <span className="px-2 py-1 bg-green-500/20 text-green-300 text-xs rounded-full">
+                            🟢 Online
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Language Exchange Info */}
+                  <div className="bg-cyan-800/20 rounded-2xl p-4 mb-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="text-center flex-1">
+                        <p className="text-xs text-cyan-400 mb-1">Native</p>
+                        <p className="text-white font-semibold">{partner.nativeLanguage}</p>
+                      </div>
+                      <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center">
+                        ⇄
+                      </div>
+                      <div className="text-center flex-1">
+                        <p className="text-xs text-cyan-400 mb-1">Learning</p>
+                        <p className="text-white font-semibold">{partner.learningLanguage}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Interests */}
+                  <div className="mb-4">
+                    <p className="text-xs text-cyan-400 mb-2">🎯 Interests</p>
+                    <div className="flex flex-wrap gap-2">
+                      {partner.interests.map((interest, idx) => (
+                        <span key={idx} className="px-3 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full border border-blue-500/30">
+                          {interest}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => sendFriendRequest(partner.id)}
+                      className="py-3 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl text-white font-medium text-sm shadow-lg shadow-cyan-500/25"
+                    >
+                      💬 Connect
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white font-medium text-sm shadow-lg shadow-purple-500/25"
+                    >
+                      📹 Video Call
+                    </motion.button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Language Activities Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-gradient-to-r from-green-900/40 to-teal-900/40 backdrop-blur-sm border border-green-500/30 rounded-3xl p-6"
+            >
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center">
+                  🎮
+                </div>
+                <h3 className="text-lg font-bold text-white">Language Activities</h3>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-4 bg-green-800/30 rounded-2xl text-center border border-green-500/30 hover:border-green-400/50 transition-all"
+                >
+                  <div className="text-2xl mb-2">📝</div>
+                  <p className="text-green-300 text-xs font-medium">Weekly Challenge</p>
+                </motion.button>
+                
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-4 bg-teal-800/30 rounded-2xl text-center border border-teal-500/30 hover:border-teal-400/50 transition-all"
+                >
+                  <div className="text-2xl mb-2">🎤</div>
+                  <p className="text-teal-300 text-xs font-medium">Voice Notes</p>
+                </motion.button>
+                
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-4 bg-emerald-800/30 rounded-2xl text-center border border-emerald-500/30 hover:border-emerald-400/50 transition-all"
+                >
+                  <div className="text-2xl mb-2">🎯</div>
+                  <p className="text-emerald-300 text-xs font-medium">Mini Games</p>
+                </motion.button>
+                
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-4 bg-lime-800/30 rounded-2xl text-center border border-lime-500/30 hover:border-lime-400/50 transition-all"
+                >
+                  <div className="text-2xl mb-2">📚</div>
+                  <p className="text-lime-300 text-xs font-medium">Resources</p>
+                </motion.button>
+              </div>
+            </motion.div>
+
+            {/* Points & Rewards Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="bg-gradient-to-r from-yellow-900/40 to-amber-900/40 backdrop-blur-sm border border-yellow-500/30 rounded-3xl p-6"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full flex items-center justify-center">
+                    🏆
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Your Progress</h3>
+                    <p className="text-yellow-300 text-sm">1,250 points earned</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-yellow-400">⭐ 1,250</p>
+                  <p className="text-xs text-yellow-300">Language Points</p>
+                </div>
+              </div>
+              
+              <div className="bg-yellow-800/20 rounded-2xl p-4 mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-yellow-300 text-sm">Progress to next level</span>
+                  <span className="text-yellow-400 text-sm font-medium">75%</span>
+                </div>
+                <div className="w-full bg-yellow-900/30 rounded-full h-2">
+                  <div className="bg-gradient-to-r from-yellow-500 to-amber-500 h-2 rounded-full" style={{width: '75%'}}></div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-2">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="p-3 bg-yellow-500/20 text-yellow-300 rounded-xl text-xs font-medium"
+                >
+                  🎓 Course Discount
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="p-3 bg-amber-500/20 text-amber-300 rounded-xl text-xs font-medium"
+                >
+                  📖 Free Books
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="p-3 bg-orange-500/20 text-orange-300 rounded-xl text-xs font-medium"
+                >
+                  🍽️ Food Coupons
+                </motion.button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
       </div>
 
       {/* New Post Modal */}

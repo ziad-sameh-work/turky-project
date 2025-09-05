@@ -224,16 +224,18 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userProfile, badges
       )}
 
       {/* Enhanced Floating Bottom Navigation */}
-      <FloatingBottomNav
-        activeTab={activeTab}
-        onTabChange={(tabId) => {
-          setActiveTab(tabId);
-          if (tabId === 'search' && onExplore) {
-            onExplore();
-          }
-        }}
-        variant="dashboard"
-      />
+      {!showProfile && (
+        <FloatingBottomNav
+          activeTab={activeTab}
+          onTabChange={(tabId) => {
+            setActiveTab(tabId);
+            if (tabId === 'search' && onExplore) {
+              onExplore();
+            }
+          }}
+          variant="dashboard"
+        />
+      )}
     </div>
   );
 };
