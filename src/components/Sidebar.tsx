@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface SidebarProps {
@@ -12,127 +12,50 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNavigate }) => {
   const navigationItems = [
     {
-      id: 'home',
-      title: 'الصفحة الرئيسية',
-      titleEn: 'Home',
-      icon: '🏠',
-      color: 'from-red-500 to-red-700'
-    },
-    {
-      id: 'explore',
-      title: 'استكشاف',
-      titleEn: 'Explore',
-      icon: '🔍',
-      color: 'from-blue-500 to-blue-700'
-    },
-    {
-      id: 'universities',
-      title: 'الجامعات',
-      titleEn: 'Universities',
-      icon: '🏛️',
-      color: 'from-purple-500 to-purple-700'
-    },
-    {
-      id: 'scholarships',
-      title: 'المنح الدراسية',
-      titleEn: 'Scholarships',
-      icon: '💰',
-      color: 'from-yellow-500 to-yellow-700'
-    },
-    {
-      id: 'applications',
-      title: 'طلباتي',
-      titleEn: 'My Applications',
-      icon: '📝',
-      color: 'from-green-500 to-green-700'
-    },
-    {
       id: 'favorites',
-      title: 'المفضلة',
+      title: 'Favorites',
       titleEn: 'Favorites',
       icon: '❤️',
       color: 'from-pink-500 to-pink-700'
     },
     {
       id: 'community',
-      title: 'المجتمع',
+      title: 'Community',
       titleEn: 'Community',
       icon: '👥',
       color: 'from-indigo-500 to-indigo-700'
     },
     {
-      id: 'chatbot',
-      title: 'المساعد الذكي',
-      titleEn: 'AI Assistant',
-      icon: '🤖',
-      color: 'from-cyan-500 to-cyan-700'
-    },
-    {
       id: 'housing',
-      title: 'دليل السكن',
+      title: 'Housing Guide',
       titleEn: 'Housing Guide',
       icon: '🏠',
       color: 'from-orange-500 to-orange-700'
     },
     {
-      id: 'documents',
-      title: 'الوثائق المطلوبة',
-      titleEn: 'Required Documents',
-      icon: '📋',
-      color: 'from-teal-500 to-teal-700'
-    },
-    {
       id: 'planner',
-      title: 'مخطط الدراسة',
+      title: 'Study Planner',
       titleEn: 'Study Planner',
       icon: '📅',
       color: 'from-emerald-500 to-emerald-700'
     },
     {
       id: 'notifications',
-      title: 'الإشعارات',
+      title: 'Notifications',
       titleEn: 'Notifications',
       icon: '🔔',
       color: 'from-red-500 to-red-700'
     },
     {
-      id: 'diary',
-      title: 'مذكرة الدراسة',
-      titleEn: 'Study Diary',
-      icon: '📖',
-      color: 'from-pink-500 to-pink-700'
-    },
-    {
       id: 'achievements',
-      title: 'الإنجازات',
+      title: 'Achievements',
       titleEn: 'Achievements',
       icon: '🏆',
       color: 'from-purple-500 to-purple-700'
     },
     {
-      id: 'premium',
-      title: 'العضوية المميزة',
-      titleEn: 'Premium',
-      icon: '👑',
-      color: 'from-yellow-500 to-yellow-700'
-    },
-    {
-      id: 'costs',
-      title: 'حاسبة التكاليف',
-      titleEn: 'Cost Calculator',
-      icon: '💳',
-      color: 'from-blue-500 to-blue-700'
-    },
-    {
-      id: 'profile',
-      title: 'الملف الشخصي',
-      titleEn: 'Profile',
-      icon: '👤',
-      color: 'from-gray-500 to-gray-700'
-    },
-    {
       id: 'settings',
-      title: 'الإعدادات',
+      title: 'Settings',
       titleEn: 'Settings',
       icon: '⚙️',
       color: 'from-slate-500 to-slate-700'
@@ -165,18 +88,21 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNavigate }) => {
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="fixed top-0 left-0 h-full w-80 bg-gray-900/95 backdrop-blur-xl border-r border-gray-700/50 z-50 overflow-y-auto"
           >
-            {/* Header */}
+            {/* Header Logo */}
             <div className="p-6 border-b border-gray-700/50">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-bold text-white mb-1">القائمة الرئيسية</h2>
-                  <p className="text-gray-400 text-sm">Navigation Menu</p>
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-center flex-1">
+                  <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-r from-red-500 to-red-700 rounded-2xl flex items-center justify-center">
+                    <span className="text-white text-2xl">🎓</span>
+                  </div>
+                  <h3 className="text-white font-bold text-lg mb-1">Turkish Study App</h3>
+                  <p className="text-gray-400 text-sm">Your gateway to Turkish universities</p>
                 </div>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={onClose}
-                  className="p-2 bg-gray-800/50 rounded-xl border border-gray-700/50 hover:bg-gray-700/50 transition-colors"
+                  className="p-2 bg-gray-800/50 rounded-xl border border-gray-700/50 hover:bg-gray-700/50 transition-colors absolute top-4 right-4"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -205,7 +131,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNavigate }) => {
                     </div>
                     
                     {/* Text Content */}
-                    <div className="flex-1 text-right rtl:text-right">
+                    <div className="flex-1 text-left">
                       <h3 className="text-white font-semibold text-base mb-1">{item.title}</h3>
                       <p className="text-gray-400 text-sm">{item.titleEn}</p>
                     </div>
@@ -225,16 +151,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNavigate }) => {
               ))}
             </div>
 
-            {/* Footer */}
-            <div className="p-6 border-t border-gray-700/50 mt-4">
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-r from-red-500 to-red-700 rounded-2xl flex items-center justify-center">
-                  <span className="text-white text-2xl">🎓</span>
-                </div>
-                <h3 className="text-white font-bold text-lg mb-1">Turkish Study App</h3>
-                <p className="text-gray-400 text-sm">Your gateway to Turkish universities</p>
-              </div>
-            </div>
           </motion.div>
         </>
       )}

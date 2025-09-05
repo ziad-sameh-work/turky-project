@@ -6,6 +6,7 @@ import { mockUniversities, mockUserProfile, Badge } from '@/data/mockData';
 import FloatingBottomNav from './FloatingBottomNav';
 import UserProfile from './UserProfile';
 import Sidebar from './Sidebar';
+import UniversityDetailsModal from './UniversityDetailsModal';
 
 interface StudentDashboardProps {
   userProfile: typeof mockUserProfile;
@@ -18,16 +19,34 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userProfile, badges
   const [activeTab, setActiveTab] = useState('recommendations');
   const [showProfile, setShowProfile] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [selectedUniversity, setSelectedUniversity] = useState<typeof universityRankings[0] | null>(null);
+  const [showUniversityModal, setShowUniversityModal] = useState(false);
 
   const earnedBadges = badges.filter(badge => badge.earned);
   const recommendations = mockUniversities.slice(0, 3);
 
-  const quickActions = [
-    { id: 'search', icon: '🔍', title: 'Search Universities', color: 'from-blue-500 to-blue-700' },
-    { id: 'favorites', icon: '❤️', title: 'My Favorites', color: 'from-pink-500 to-pink-700' },
-    { id: 'applications', icon: '📝', title: 'Applications', color: 'from-green-500 to-green-700' },
-    { id: 'scholarships', icon: '💰', title: 'Scholarships', color: 'from-yellow-500 to-yellow-700' }
+  const universityRankings = [
+    { name: 'Boğaziçi University', nameEn: 'Boğaziçi University', rank: 1, score: 95, city: 'Istanbul' },
+    { name: 'Middle East Technical University', nameEn: 'METU', rank: 2, score: 92, city: 'Ankara' },
+    { name: 'Istanbul Technical University', nameEn: 'ITU', rank: 3, score: 89, city: 'Istanbul' },
+    { name: 'Istanbul University', nameEn: 'Istanbul University', rank: 4, score: 86, city: 'Istanbul' }
   ];
+
+  const scholarships = [
+    { name: 'Türkiye Government Scholarship', nameEn: 'Türkiye Scholarships', type: 'full', amount: 'Fully Funded', deadline: '2024-02-20' },
+    { name: 'ITU International Scholarship', nameEn: 'ITU Scholarships', type: 'partial', amount: '50% Tuition Coverage', deadline: '2024-03-15' },
+    { name: 'Boğaziçi Excellence Scholarship', nameEn: 'Boğaziçi Scholarships', type: 'full', amount: 'Fully Funded', deadline: '2024-01-30' }
+  ];
+
+  const handleUniversityClick = (university: typeof universityRankings[0]) => {
+    setSelectedUniversity(university);
+    setShowUniversityModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowUniversityModal(false);
+    setSelectedUniversity(null);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black relative overflow-hidden">
@@ -116,35 +135,100 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userProfile, badges
           </motion.div>
         )}
 
-        {/* Quick Actions */}
+        {/* University Rankings */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
           className="mb-8"
         >
-          <h2 className="text-lg font-bold text-white mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 gap-4">
-            {quickActions.map((action, index) => (
-              <motion.button
-                key={action.id}
+          <h2 className="text-lg font-bold text-white mb-4">🏛️ Turkish University Rankings</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {universityRankings.map((university, index) => (
+              <motion.div
+                key={university.rank}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5 + index * 0.1 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  if (onExplore) {
-                    onExplore();
-                  }
-                }}
+                whileHover={{ scale: 1.02 }}
+                onClick={() => handleUniversityClick(university)}
+                className="p-4 bg-gray-800/40 border border-gray-700/30 rounded-2xl backdrop-blur-sm hover:bg-gray-800/60 transition-all duration-300 cursor-pointer"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-2">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm ${
+                      university.rank <= 3 ? 'bg-gradient-to-r from-yellow-500 to-orange-500' : 'bg-gray-600'
+                    }`}>
+                      {university.rank}
+                    </div>
+                    <span className="text-white font-medium text-sm">{university.score}/100</span>
+                  </div>
+                  <span className="text-gray-400 text-xs">{university.city}</span>
+                </div>
+                
+                <h3 className="text-white font-semibold mb-1">{university.name}</h3>
+                <p className="text-gray-400 text-sm">{university.nameEn}</p>
+                
+                <div className="mt-3">
+                  <div className="w-full bg-gray-600 rounded-full h-2">
+                    <div 
+                      className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full"
+                      style={{ width: `${university.score}%` }}
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Scholarships */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="mb-8"
+        >
+          <h2 className="text-lg font-bold text-white mb-4">💰 Available Scholarships</h2>
+          <div className="space-y-4">
+            {scholarships.map((scholarship, index) => (
+              <motion.div
+                key={scholarship.name}
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.7 + index * 0.1 }}
+                whileHover={{ scale: 1.02 }}
                 className="p-4 bg-gray-800/40 border border-gray-700/30 rounded-2xl backdrop-blur-sm hover:bg-gray-800/60 transition-all duration-300"
               >
-                <div className={`w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-r ${action.color} flex items-center justify-center text-xl`}>
-                  {action.icon}
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <h3 className="text-white font-semibold">{scholarship.name}</h3>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        scholarship.type === 'full' 
+                          ? 'bg-green-500/20 text-green-400' 
+                          : 'bg-blue-500/20 text-blue-400'
+                      }`}>
+                        {scholarship.amount}
+                      </span>
+                    </div>
+                    <p className="text-gray-400 text-sm mb-2">{scholarship.nameEn}</p>
+                    <div className="flex items-center space-x-2 text-xs">
+                      <span className="text-red-400">📅 Deadline:</span>
+                      <span className="text-red-400 font-medium">
+                        {new Date(scholarship.deadline).toLocaleDateString('en-US')}
+                      </span>
+                    </div>
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="w-8 h-8 bg-yellow-500/20 border border-yellow-500/30 rounded-lg flex items-center justify-center flex-shrink-0"
+                  >
+                    <span className="text-yellow-400 text-sm">→</span>
+                  </motion.button>
                 </div>
-                <div className="text-white font-semibold text-sm">{action.title}</div>
-              </motion.button>
+              </motion.div>
             ))}
           </div>
         </motion.div>
@@ -256,8 +340,15 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userProfile, badges
         </div>
       )}
 
+      {/* University Details Modal */}
+      <UniversityDetailsModal
+        university={selectedUniversity}
+        isOpen={showUniversityModal}
+        onClose={handleCloseModal}
+      />
+
       {/* Enhanced Floating Bottom Navigation */}
-      {!showProfile && (
+      {!showProfile && !showUniversityModal && (
         <FloatingBottomNav
           activeTab={activeTab}
           onTabChange={(tabId) => {
